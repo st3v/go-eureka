@@ -46,8 +46,8 @@ var _ = Describe("Instance", func() {
 				},
 			},
 			Metadata: map[string]string{
-				"foo": "one",
-				"bar": "two",
+				"b": "two",
+				"a": "one",
 			},
 		}
 	)

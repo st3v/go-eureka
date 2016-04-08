@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"sort"
 )
 
 type Instance struct {
@@ -130,8 +131,14 @@ func (m Metadata) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return err
 	}
 
-	for key, value := range m {
-		if err := e.EncodeElement(value, xml.StartElement{Name: xml.Name{Local: key}}); err != nil {
+	var keys []string
+	for key := range m {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+	for _, key := range keys {
+		if err := e.EncodeElement(m[key], xml.StartElement{Name: xml.Name{Local: key}}); err != nil {
 			return err
 		}
 	}

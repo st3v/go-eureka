@@ -30,7 +30,7 @@
         <evictionDurationInSecs>123</evictionDurationInSecs>
     </leaseInfo>
     <metadata>
-        <foo>one</foo>
-        <bar>two</bar>
+        <a>one</a>
+        <b>two</b>
     </metadata>
 </instance>
