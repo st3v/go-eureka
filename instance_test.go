@@ -56,10 +56,11 @@ var _ = Describe("Instance", func() {
 		var err error
 		instanceXml, err = ioutil.ReadFile(filepath.Join("fixtures", "instance.xml"))
 		Expect(err).ToNot(HaveOccurred())
+		instanceXml = removeIdendation(instanceXml)
 	})
 
 	It("can be marshaled to an XML string", func() {
-		data, err := xml.MarshalIndent(instance, "", "    ")
+		data, err := xml.Marshal(instance)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(data).To(Equal(instanceXml))
 	})
