@@ -2,6 +2,8 @@ package jolt_test
 
 import (
 	"encoding/xml"
+	"io/ioutil"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -10,30 +12,62 @@ import (
 
 var _ = Describe("Instance", func() {
 	var (
-		instanceXml = []byte("<instance><hostName>hostname</hostName><app>app</app><ipAddr>1.2.3.4</ipAddr><vipAddress>hostname.domain</vipAddress><secureVipAddress></secureVipAddress><status>UP</status><port>0</port><securePort>0</securePort><homePageUrl></homePageUrl><statusPageUrl></statusPageUrl><healthCheckUrl></healthCheckUrl><dataCenterInfo><name>MyOwn</name><metadata><Hostname></Hostname><public-hostname></public-hostname><local-hostname></local-hostname><PublicIpv4></PublicIpv4><local-ipv4></local-ipv4><availability-zone></availability-zone><instance-id></instance-id><instance-type></instance-type><ami-id></ami-id><ami-launch-index></ami-launch-index><ami-manifest-path></ami-manifest-path></metadata></dataCenterInfo><leaseInfo><evictionDurationInSecs>0</evictionDurationInSecs></leaseInfo><metadata><foo>one</foo><bar>two</bar></metadata></instance>")
+		instanceXml []byte
+		instance    = jolt.Instance{
+			XMLName:        xml.Name{Local: "instance"},
+			HostName:       "host",
+			App:            "myapp",
+			IpAddr:         "1.2.3.4",
+			VipAddr:        "vip.address",
+			SecureVipAddr:  "secure.vip.address",
+			Status:         jolt.StatusOutOfService,
+			Port:           80,
+			SecurePort:     443,
+			HomePageUrl:    "home.page.url",
+			StatusPageUrl:  "status.page.url",
+			HealthCheckUrl: "health.check.url",
+			LeaseInfo: jolt.Lease{
+				EvictionDurationInSecs: 123,
+			},
+			DataCenterInfo: jolt.DataCenter{
+				Type: jolt.DataCenterTypePrivate,
+				Metadata: jolt.AmazonMetadata{
+					Hostname:         "dchost",
+					PublicHostName:   "dc.public.host",
+					LocalHostName:    "dc.local.host",
+					PublicIpv4:       "1.2.3.5",
+					LocalIpv4:        "1.2.3.6",
+					AvailabilityZone: "az",
+					InstanceId:       "instance.id",
+					InstanceType:     "instance.type",
+					AmiId:            "ami.id",
+					AmiLaunchIndex:   "ami.launch.index",
+					AmiManifestPath:  "ami.manifest.path",
+				},
+			},
+			Metadata: map[string]string{
+				"foo": "one",
+				"bar": "two",
+			},
+		}
 	)
 
-	It("can be marshaled to an XML string", func() {
-		instance := jolt.Instance{
-			HostName: "hostname",
-			App:      "app",
-			IpAddr:   "1.2.3.4",
-			VipAddr:  "hostname.domain",
-			Metadata: map[string]string{"foo": "one", "bar": "two"},
-		}
-
-		xmlStr, err := xml.Marshal(instance)
-
+	BeforeEach(func() {
+		var err error
+		instanceXml, err = ioutil.ReadFile(filepath.Join("fixtures", "instance.xml"))
 		Expect(err).ToNot(HaveOccurred())
-		Expect(xmlStr).To(Equal(instanceXml))
+	})
 
+	It("can be marshaled to an XML string", func() {
+		data, err := xml.MarshalIndent(instance, "", "    ")
+		Expect(err).ToNot(HaveOccurred())
+		Expect(data).To(Equal(instanceXml))
 	})
 
 	It("can be unmarshaled from an XML string", func() {
-		var instance jolt.Instance
-		err := xml.Unmarshal(instanceXml, &instance)
-
+		var actual jolt.Instance
+		err := xml.Unmarshal(instanceXml, &actual)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(instance.HostName).To(Equal("hostname"))
+		Expect(actual).To(Equal(instance))
 	})
 })

@@ -1,0 +1,36 @@
+<instance>
+    <hostName>host</hostName>
+    <app>myapp</app>
+    <ipAddr>1.2.3.4</ipAddr>
+    <vipAddress>vip.address</vipAddress>
+    <secureVipAddress>secure.vip.address</secureVipAddress>
+    <status>OUT_OF_SERVICE</status>
+    <port>80</port>
+    <securePort>443</securePort>
+    <homePageUrl>home.page.url</homePageUrl>
+    <statusPageUrl>status.page.url</statusPageUrl>
+    <healthCheckUrl>health.check.url</healthCheckUrl>
+    <dataCenterInfo>
+        <name>MyOwn</name>
+        <metadata>
+            <Hostname>dchost</Hostname>
+            <public-hostname>dc.public.host</public-hostname>
+            <local-hostname>dc.local.host</local-hostname>
+            <PublicIpv4>1.2.3.5</PublicIpv4>
+            <local-ipv4>1.2.3.6</local-ipv4>
+            <availability-zone>az</availability-zone>
+            <instance-id>instance.id</instance-id>
+            <instance-type>instance.type</instance-type>
+            <ami-id>ami.id</ami-id>
+            <ami-launch-index>ami.launch.index</ami-launch-index>
+            <ami-manifest-path>ami.manifest.path</ami-manifest-path>
+        </metadata>
+    </dataCenterInfo>
+    <leaseInfo>
+        <evictionDurationInSecs>123</evictionDurationInSecs>
+    </leaseInfo>
+    <metadata>
+        <foo>one</foo>
+        <bar>two</bar>
+    </metadata>
+</instance>

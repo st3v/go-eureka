@@ -19,7 +19,7 @@ type Instance struct {
 	HomePageUrl    string     `xml:"homePageUrl"`
 	StatusPageUrl  string     `xml:"statusPageUrl"`
 	HealthCheckUrl string     `xml:"healthCheckUrl"`
-	DatacenterInfo Datacenter `xml:"dataCenterInfo"`
+	DataCenterInfo DataCenter `xml:"dataCenterInfo"`
 	LeaseInfo      Lease      `xml:"leaseInfo"`
 	Metadata       Metadata   `xml:"metadata"`
 }
@@ -28,14 +28,14 @@ type Lease struct {
 	EvictionDurationInSecs int `xml:"evictionDurationInSecs"`
 }
 
-type Datacenter struct {
-	Name     datacenterName `xml:"name"`
-	Metadata amazonMetadata `xml:"metadata"`
+type DataCenter struct {
+	Type     dataCenterType `xml:"name"`
+	Metadata AmazonMetadata `xml:"metadata"`
 }
 
-type amazonMetadata struct {
+type AmazonMetadata struct {
 	Hostname         string `xml:"hostname'`
-	PublicHostname   string `xml:"public-hostname"`
+	PublicHostName   string `xml:"public-hostname"`
 	LocalHostName    string `xml:"local-hostname"`
 	PublicIpv4       string `xml:"public-ipv4'`
 	LocalIpv4        string `xml:"local-ipv4"`
@@ -47,39 +47,39 @@ type amazonMetadata struct {
 	AmiManifestPath  string `xml:"ami-manifest-path"`
 }
 
-type datacenterName uint8
+type dataCenterType uint8
 
 const (
-	DatacenterPrivate datacenterName = iota
-	DatacenterAmazon
+	DataCenterTypePrivate dataCenterType = iota
+	DataCenterTypeAmazon
 )
 
-var datacenterNames = []string{
+var dataCenterTypes = []string{
 	"MyOwn",
 	"Amazon",
 }
 
-func (dn datacenterName) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	if int(dn) >= len(datacenterNames) {
-		return fmt.Errorf("Unknown datacenter code: %d", dn)
+func (dn dataCenterType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if int(dn) >= len(dataCenterTypes) {
+		return fmt.Errorf("Unknown datacenter type code: %d", dn)
 	}
-	return e.EncodeElement(datacenterNames[dn], start)
+	return e.EncodeElement(dataCenterTypes[dn], start)
 }
 
-func (dn *datacenterName) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+func (dn *dataCenterType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var str string
 	if err := d.DecodeElement(&str, &start); err != nil {
 		return err
 	}
 
-	for i, n := range datacenterNames {
+	for i, n := range dataCenterTypes {
 		if n == str {
-			*dn = datacenterName(i)
+			*dn = dataCenterType(i)
 			return nil
 		}
 	}
 
-	return fmt.Errorf("Unknown datacenter name: %s", str)
+	return fmt.Errorf("Unknown datacenter type: %s", str)
 }
 
 type status uint8
