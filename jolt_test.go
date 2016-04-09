@@ -15,6 +15,7 @@ import (
 
 type Client interface {
 	Register(jolt.Instance) error
+	Deregister(jolt.Instance) error
 }
 
 var _ = Describe("jolt", func() {
@@ -23,6 +24,7 @@ var _ = Describe("jolt", func() {
 		client      Client
 		instanceXml []byte
 		instance    jolt.Instance
+		statusCode  int
 	)
 
 	BeforeEach(func() {
@@ -42,8 +44,6 @@ var _ = Describe("jolt", func() {
 	})
 
 	Describe(".Register", func() {
-		var statusCode int
-
 		BeforeEach(func() {
 			route := fmt.Sprintf("/apps/%s", instance.App)
 			statusCode = http.StatusNoContent
@@ -74,6 +74,40 @@ var _ = Describe("jolt", func() {
 
 			It("returns an error", func() {
 				err := client.Register(instance)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
+
+	Describe(".Deregister", func() {
+		BeforeEach(func() {
+			route := fmt.Sprintf("/apps/%s/%s", instance.App, instance.HostName)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("DELETE", route),
+					ghttp.RespondWithPtr(&statusCode, nil),
+				),
+			)
+		})
+
+		It("returns no error", func() {
+			err := client.Deregister(instance)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("sends the correct POST request to the /apps route", func() {
+			client.Deregister(instance)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				err := client.Deregister(instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
