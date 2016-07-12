@@ -20,6 +20,7 @@ func main() {
 	app.Commands = []cli.Command{
 		registerCmd,
 		deregisterCmd,
+		heartbeatCmd,
 	}
 
 	app.Run(os.Args)

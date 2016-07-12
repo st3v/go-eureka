@@ -65,6 +65,10 @@ func (c *Client) Deregister(instance Instance) error {
 	return c.request("DELETE", c.instanceURI(instance), nil, http.StatusOK)
 }
 
+func (c *Client) Heartbeat(instance Instance) error {
+	return c.request("PUT", c.instanceURI(instance), nil, http.StatusOK)
+}
+
 func (c *Client) request(method, uri string, body []byte, respCode int) error {
 	req, err := http.NewRequest(method, uri, bytes.NewBuffer(body))
 	if err != nil {

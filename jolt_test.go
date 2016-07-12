@@ -108,4 +108,38 @@ var _ = Describe("jolt", func() {
 			})
 		})
 	})
+
+	Describe(".Heartbeat", func() {
+		BeforeEach(func() {
+			route := fmt.Sprintf("/apps/%s/%s", instance.App, instance.Id)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PUT", route),
+					ghttp.RespondWithPtr(&statusCode, nil),
+				),
+			)
+		})
+
+		It("returns no error", func() {
+			err := client.Heartbeat(instance)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("sends the correct PUT request to the /apps route", func() {
+			client.Heartbeat(instance)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				err := client.Heartbeat(instance)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
 })
