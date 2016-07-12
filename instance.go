@@ -9,6 +9,7 @@ import (
 
 type Instance struct {
 	XMLName        xml.Name   `xml:"instance"`
+	Id             string     `xml:"instanceId"`
 	HostName       string     `xml:"hostName"`
 	App            string     `xml:"app"`
 	IpAddr         string     `xml:"ipAddr"`

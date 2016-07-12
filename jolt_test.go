@@ -81,7 +81,7 @@ var _ = Describe("jolt", func() {
 
 	Describe(".Deregister", func() {
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s", instance.App, instance.HostName)
+			route := fmt.Sprintf("/apps/%s/%s", instance.App, instance.Id)
 			statusCode = http.StatusOK
 			server.AppendHandlers(
 				ghttp.CombineHandlers(

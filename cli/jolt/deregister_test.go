@@ -34,7 +34,7 @@ var _ = Describe("deregister command", func() {
 		statusCode = http.StatusOK
 		server.AppendHandlers(
 			ghttp.CombineHandlers(
-				ghttp.VerifyRequest("DELETE", "/apps/myapp/host"),
+				ghttp.VerifyRequest("DELETE", "/apps/myapp/id"),
 				ghttp.RespondWithPtr(&statusCode, nil),
 			),
 		)
@@ -57,7 +57,7 @@ var _ = Describe("deregister command", func() {
 	})
 
 	It("provides basic logs on stdout", func() {
-		Eventually(session).Should(gbytes.Say("Deregistering instance 'host' for application 'myapp'..."))
+		Eventually(session).Should(gbytes.Say("Deregistering instance 'id' for application 'myapp'..."))
 		Eventually(session).Should(gbytes.Say("Success"))
 	})
 

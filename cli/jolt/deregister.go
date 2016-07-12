@@ -20,7 +20,7 @@ var deregisterCmd = cli.Command{
 		instance := getInstance(c, "deregister")
 		endpoints := getEndpoints(c, "deregister")
 
-		log.Printf("Deregistering instance '%s' for application '%s'... \n", instance.HostName, instance.App)
+		log.Printf("Deregistering instance '%s' for application '%s'... \n", instance.Id, instance.App)
 		client := jolt.NewClient(endpoints)
 		if err := client.Deregister(instance); err != nil {
 			log.Fatalf("Error deregistering instance with Eureka: %s", err)

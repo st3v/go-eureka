@@ -28,7 +28,7 @@ func (c *client) appsURI(instance Instance) string {
 }
 
 func (c *client) instanceURI(instance Instance) string {
-	return fmt.Sprintf("%s/%s", c.appsURI(instance), instance.HostName)
+	return fmt.Sprintf("%s/%s", c.appsURI(instance), instance.Id)
 }
 
 func (c *client) Register(instance Instance) error {

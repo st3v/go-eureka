@@ -59,7 +59,7 @@ var _ = Describe("register command", func() {
 	})
 
 	It("provides basic logs on stdout", func() {
-		Eventually(session).Should(gbytes.Say("Registering instance 'host' for application 'myapp'..."))
+		Eventually(session).Should(gbytes.Say("Registering instance 'id' for application 'myapp'..."))
 		Eventually(session).Should(gbytes.Say("Success"))
 	})
 

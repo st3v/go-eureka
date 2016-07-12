@@ -15,6 +15,7 @@ var _ = Describe("Instance", func() {
 		instanceXml []byte
 		instance    = jolt.Instance{
 			XMLName:        xml.Name{Local: "instance"},
+			Id:             "id",
 			HostName:       "host",
 			App:            "myapp",
 			IpAddr:         "1.2.3.4",
