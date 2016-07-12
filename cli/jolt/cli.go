@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/micro/cli"
+	"github.com/codegangsta/cli"
 )
 
 func init() {

@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/micro/cli"
+	"github.com/codegangsta/cli"
+
 	"github.com/st3v/jolt"
 )
 
