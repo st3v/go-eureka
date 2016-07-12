@@ -10,59 +10,76 @@ import (
 	"time"
 )
 
-type client struct {
-	endpoints []string
+type Client struct {
+	endpoints  []string
+	httpClient *http.Client
 }
 
-func NewClient(endpoints []string) *client {
+func init() {
 	rand.Seed(time.Now().Unix())
-	return &client{endpoints}
 }
 
-func (c *client) endpoint() string {
+type Option func(*Client)
+
+func HttpClient(c *http.Client) Option {
+	return func(client *Client) {
+		client.httpClient = c
+	}
+}
+
+func NewClient(endpoints []string, options ...Option) *Client {
+	c := &Client{
+		endpoints:  endpoints,
+		httpClient: http.DefaultClient,
+	}
+
+	for _, opt := range options {
+		opt(c)
+	}
+
+	return c
+}
+
+func (c *Client) endpoint() string {
 	return strings.TrimRight(c.endpoints[rand.Intn(len(c.endpoints))], " /")
 }
 
-func (c *client) appsURI(instance Instance) string {
+func (c *Client) appURI(instance Instance) string {
 	return fmt.Sprintf("%s/apps/%s", c.endpoint(), instance.App)
 }
 
-func (c *client) instanceURI(instance Instance) string {
-	return fmt.Sprintf("%s/%s", c.appsURI(instance), instance.Id)
+func (c *Client) instanceURI(instance Instance) string {
+	return fmt.Sprintf("%s/%s", c.appURI(instance), instance.Id)
 }
 
-func (c *client) Register(instance Instance) error {
+func (c *Client) Register(instance Instance) error {
 	data, err := xml.Marshal(instance)
 	if err != nil {
 		return err
 	}
 
-	uri := c.appsURI(instance)
-	resp, err := http.Post(uri, "application/xml", bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
-	}
-
-	return nil
+	return c.request("POST", c.appURI(instance), data, http.StatusNoContent)
 }
 
-func (c *client) Deregister(instance Instance) error {
-	uri := c.instanceURI(instance)
-	req, err := http.NewRequest("DELETE", uri, nil)
+func (c *Client) Deregister(instance Instance) error {
+	return c.request("DELETE", c.instanceURI(instance), nil, http.StatusOK)
+}
+
+func (c *Client) request(method, uri string, body []byte, respCode int) error {
+	req, err := http.NewRequest(method, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	req.Header.Add("Content-Type", "application/xml")
+	req.Header.Add("Accept", "application/xml")
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != respCode {
 		return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
 	}
 

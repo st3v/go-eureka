@@ -10,18 +10,14 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+
 	"github.com/st3v/jolt"
 )
-
-type Client interface {
-	Register(jolt.Instance) error
-	Deregister(jolt.Instance) error
-}
 
 var _ = Describe("jolt", func() {
 	var (
 		server      *ghttp.Server
-		client      Client
+		client      *jolt.Client
 		instanceXml []byte
 		instance    jolt.Instance
 		statusCode  int
