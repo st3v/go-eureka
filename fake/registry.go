@@ -1,8 +1,10 @@
-package test
+package fake
 
 import (
 	"encoding/xml"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/emicklei/go-restful"
 	"github.com/st3v/go-eureka"
@@ -15,6 +17,25 @@ type registry struct {
 func NewRegistry() *registry {
 	return &registry{
 		apps: map[string]eureka.App{},
+	}
+}
+
+func (r *registry) HttpServer(addr string, debug bool) *http.Server {
+	if debug {
+		restful.TraceLogger(log.New(os.Stdout, "[restful] ", log.LstdFlags|log.Lshortfile))
+	}
+
+	s := new(restful.WebService).Path("/apps").Produces(restful.MIME_XML)
+	s.Route(s.POST("/{app-name}").To(r.register).Consumes(restful.MIME_XML))
+	s.Route(s.DELETE("/{app-name}/{instance-id}").To(r.deregister))
+	s.Route(s.PUT("/{app-name}/{instance-id}").To(r.heartbeat))
+	s.Route(s.GET("/").To(r.list))
+	s.Route(s.GET("/{app-name}").To(r.app))
+	s.Route(s.GET("/{app-name}/{instance-id}").To(r.instance))
+
+	return &http.Server{
+		Addr:    addr,
+		Handler: restful.NewContainer().Add(s),
 	}
 }
 
@@ -97,7 +118,7 @@ func (r *registry) list(req *restful.Request, resp *restful.Response) {
 	}
 
 	payload := struct {
-		XMLName xml.Name   `xml: "applications"`
+		XMLName xml.Name     `xml: "applications"`
 		Apps    []eureka.App `xml: "application"`
 	}{
 		XMLName: xml.Name{Local: "applications"},

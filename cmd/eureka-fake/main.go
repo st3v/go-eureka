@@ -6,16 +6,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/st3v/go-eureka/test"
+	"github.com/st3v/go-eureka/fake"
 )
 
 const warning = `
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    !!!                                            !!!
-    !!! THIS EUREKA SERVER IS FOR TESTING PURPOSES !!!
-    !!!    ONLY. DO NOT USE THIS IN PRODUCTION.    !!!
-    !!!                                            !!!
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!                                                   !!!
+    !!!  THIS IS A FAKE EUREKA SERVER, MEANT FOR TESTING  !!!
+    !!!   PURPOSES ONLY. DO NOT USE THIS IN PRODUCTION.   !!!
+    !!!                                                   !!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 `
 
 var (
@@ -34,7 +34,7 @@ func main() {
 	flag.Parse()
 
 	addr := fmt.Sprintf("%s:%d", host, port)
-	server := test.NewServer(addr, debug)
+	server := fake.NewRegistry().HttpServer(addr, debug)
 
 	log.Println(warning)
 
