@@ -32,7 +32,7 @@ func removeIdendation(data []byte) []byte {
 
 var _ = BeforeSuite(func() {
 	var err error
-	binPath, err = gexec.Build("github.com/st3v/jolt/cli/jolt")
+	binPath, err = gexec.Build("github.com/st3v/jolt/cmd/jolt")
 	Expect(err).ToNot(HaveOccurred())
 })
 
