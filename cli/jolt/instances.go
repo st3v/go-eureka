@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
 	"log"
 
 	"github.com/codegangsta/cli"
@@ -24,7 +23,7 @@ var instancesCmd = cli.Command{
 		endpoints := getEndpoints(c, "heartbeat")
 		client := jolt.NewClient(endpoints)
 
-		instances := make([]jolt.Instance, 1)
+		var instances []jolt.Instance
 
 		appName := c.String("app")
 		instanceId := c.String("instance")
@@ -40,7 +39,7 @@ var instancesCmd = cli.Command{
 
 			instance, err := client.Instance(appName, instanceId)
 			if err != nil {
-				log.Fatalf("Error retrieving instances: %s", err)
+				log.Fatalf("Error retrieving instance: %s", err)
 			}
 
 			instances = append(instances, instance)
@@ -49,7 +48,7 @@ var instancesCmd = cli.Command{
 
 			app, err := client.App(appName)
 			if err != nil {
-				log.Fatalf("Error retrieving instances: %s", err)
+				log.Fatalf("Error retrieving application: %s", err)
 			}
 
 			instances = append(instances, app.Instances...)
@@ -58,12 +57,7 @@ var instancesCmd = cli.Command{
 
 			apps, err := client.Apps()
 			if err != nil {
-				log.Fatalf("Error retrieving instances: %s", err)
-			}
-
-			if len(apps) == 0 {
-				fmt.Println("No registered apps")
-				return
+				log.Fatalf("Error retrieving applications: ", err)
 			}
 
 			for _, app := range apps {
@@ -71,10 +65,18 @@ var instancesCmd = cli.Command{
 			}
 		}
 
-		for _, i := range instances {
-			if data, err := xml.MarshalIndent(i, "", "  "); err == nil {
-				log.Println(string(data))
-			}
+		output := struct {
+			XMLName   xml.Name        `xml:"instances"`
+			Instances []jolt.Instance `xml:"instance"`
+		}{
+			Instances: instances,
 		}
+
+		data, err := xml.MarshalIndent(output, "", "  ")
+		if err != nil {
+			log.Fatalf("Error rendering output: %s", err)
+		}
+
+		log.Println(string(data))
 	},
 }

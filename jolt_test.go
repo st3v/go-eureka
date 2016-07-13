@@ -16,11 +16,10 @@ import (
 
 var _ = Describe("jolt", func() {
 	var (
-		server      *ghttp.Server
-		client      *jolt.Client
-		instanceXml []byte
-		instance    jolt.Instance
-		statusCode  int
+		server     *ghttp.Server
+		client     *jolt.Client
+		instance   *jolt.Instance
+		statusCode int
 	)
 
 	BeforeEach(func() {
@@ -28,10 +27,7 @@ var _ = Describe("jolt", func() {
 		client = jolt.NewClient([]string{server.URL()})
 
 		var err error
-		instanceXml, err = ioutil.ReadFile(filepath.Join("fixtures", "instance.xml"))
-		Expect(err).ToNot(HaveOccurred())
-
-		err = xml.Unmarshal(instanceXml, &instance)
+		instance, err = instanceFixture()
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -41,6 +37,9 @@ var _ = Describe("jolt", func() {
 
 	Describe(".Register", func() {
 		BeforeEach(func() {
+			instanceXml, err := ioutil.ReadFile(filepath.Join("fixtures", "instance.xml"))
+			Expect(err).ToNot(HaveOccurred())
+
 			route := fmt.Sprintf("/apps/%s", instance.AppName)
 			statusCode = http.StatusNoContent
 			server.AppendHandlers(
@@ -53,14 +52,14 @@ var _ = Describe("jolt", func() {
 			)
 		})
 
-		It("returns no error", func() {
-			err := client.Register(instance)
-			Expect(err).ToNot(HaveOccurred())
+		It("sends the correct request", func() {
+			client.Register(*instance)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
-		It("sends the correct POST request to the /apps route", func() {
-			client.Register(instance)
-			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		It("returns no error", func() {
+			err := client.Register(*instance)
+			Expect(err).ToNot(HaveOccurred())
 		})
 
 		Context("when the request fails", func() {
@@ -69,7 +68,7 @@ var _ = Describe("jolt", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.Register(instance)
+				err := client.Register(*instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -87,14 +86,14 @@ var _ = Describe("jolt", func() {
 			)
 		})
 
-		It("returns no error", func() {
-			err := client.Deregister(instance)
-			Expect(err).ToNot(HaveOccurred())
+		It("sends the correct request", func() {
+			client.Deregister(*instance)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
-		It("sends the correct POST request to the /apps route", func() {
-			client.Deregister(instance)
-			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		It("returns no error", func() {
+			err := client.Deregister(*instance)
+			Expect(err).ToNot(HaveOccurred())
 		})
 
 		Context("when the request fails", func() {
@@ -103,7 +102,7 @@ var _ = Describe("jolt", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.Deregister(instance)
+				err := client.Deregister(*instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -121,14 +120,14 @@ var _ = Describe("jolt", func() {
 			)
 		})
 
-		It("returns no error", func() {
-			err := client.Heartbeat(instance)
-			Expect(err).ToNot(HaveOccurred())
+		It("sends the correct request", func() {
+			client.Heartbeat(*instance)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
-		It("sends the correct PUT request to the /apps route", func() {
-			client.Heartbeat(instance)
-			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		It("returns no error", func() {
+			err := client.Heartbeat(*instance)
+			Expect(err).ToNot(HaveOccurred())
 		})
 
 		Context("when the request fails", func() {
@@ -137,9 +136,163 @@ var _ = Describe("jolt", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.Heartbeat(instance)
+				err := client.Heartbeat(*instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
 	})
+
+	Describe(".Apps", func() {
+		var app *jolt.App
+
+		BeforeEach(func() {
+			var err error
+			app, err = appFixture()
+			Expect(err).ToNot(HaveOccurred())
+
+			response := struct {
+				XMLName xml.Name   `xml:"applications"`
+				Apps    []jolt.App `xml:"application"`
+			}{
+				Apps: []jolt.App{*app, *app},
+			}
+
+			var body []byte
+			body, err = xml.Marshal(response)
+			Expect(err).ToNot(HaveOccurred())
+
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/apps"),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				),
+			)
+		})
+
+		It("sends the correct request", func() {
+			client.Apps()
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		It("returns no error", func() {
+			_, err := client.Apps()
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("returns the correct apps", func() {
+			apps, _ := client.Apps()
+			Expect(apps).To(HaveLen(2))
+			Expect(apps[0]).To(Equal(*app))
+			Expect(apps[1]).To(Equal(*app))
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				_, err := client.Apps()
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
+
+	Describe(".App", func() {
+		var app *jolt.App
+
+		BeforeEach(func() {
+			var err error
+			app, err = appFixture()
+			Expect(err).ToNot(HaveOccurred())
+
+			var body []byte
+			body, err = xml.Marshal(app)
+			Expect(err).ToNot(HaveOccurred())
+
+			route := fmt.Sprintf("/apps/%s", app.Name)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", route),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				),
+			)
+		})
+
+		It("sends the correct request", func() {
+			client.App(app.Name)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		It("returns no error", func() {
+			_, err := client.App(app.Name)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("returns the correct apps", func() {
+			actual, _ := client.App(app.Name)
+			Expect(actual).To(Equal(*app))
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				_, err := client.App(app.Name)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
+
+	Describe(".Instance", func() {
+		BeforeEach(func() {
+			var err error
+			instance, err = instanceFixture()
+			Expect(err).ToNot(HaveOccurred())
+
+			var body []byte
+			body, err = xml.Marshal(instance)
+			Expect(err).ToNot(HaveOccurred())
+
+			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.Id)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", route),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				),
+			)
+		})
+
+		It("sends the correct request", func() {
+			client.Instance(instance.AppName, instance.Id)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		It("returns no error", func() {
+			_, err := client.Instance(instance.AppName, instance.Id)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("returns the correct apps", func() {
+			actual, _ := client.Instance(instance.AppName, instance.Id)
+			Expect(actual).To(Equal(*instance))
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				_, err := client.Instance(instance.AppName, instance.Id)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
+
 })
