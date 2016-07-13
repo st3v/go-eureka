@@ -41,7 +41,7 @@ var _ = Describe("jolt", func() {
 
 	Describe(".Register", func() {
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s", instance.App)
+			route := fmt.Sprintf("/apps/%s", instance.AppName)
 			statusCode = http.StatusNoContent
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -77,7 +77,7 @@ var _ = Describe("jolt", func() {
 
 	Describe(".Deregister", func() {
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s", instance.App, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.Id)
 			statusCode = http.StatusOK
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -111,7 +111,7 @@ var _ = Describe("jolt", func() {
 
 	Describe(".Heartbeat", func() {
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s", instance.App, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.Id)
 			statusCode = http.StatusOK
 			server.AppendHandlers(
 				ghttp.CombineHandlers(

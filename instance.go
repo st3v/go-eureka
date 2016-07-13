@@ -7,11 +7,17 @@ import (
 	"sort"
 )
 
+type App struct {
+	XMLName   xml.Name   `xml:"application"`
+	Name      string     `xml:"name"`
+	Instances []Instance `xml:"instance"`
+}
+
 type Instance struct {
 	XMLName        xml.Name   `xml:"instance"`
 	Id             string     `xml:"instanceId"`
 	HostName       string     `xml:"hostName"`
-	App            string     `xml:"app"`
+	AppName        string     `xml:"app"`
 	IpAddr         string     `xml:"ipAddr"`
 	VipAddr        string     `xml:"vipAddress"`
 	SecureVipAddr  string     `xml:"secureVipAddress"`

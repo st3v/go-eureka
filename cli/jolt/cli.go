@@ -21,6 +21,7 @@ func main() {
 		registerCmd,
 		deregisterCmd,
 		heartbeatCmd,
+		instancesCmd,
 	}
 
 	app.Run(os.Args)

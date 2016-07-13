@@ -10,6 +10,18 @@ import (
 	"github.com/st3v/jolt"
 )
 
+var appNameFlag = cli.StringFlag{
+	Name:  "app, a",
+	Value: "",
+	Usage: "Application Name, required if instance ID has been specified",
+}
+
+var instanceIdFlag = cli.StringFlag{
+	Name:  "instance, i",
+	Value: "",
+	Usage: "Instance ID",
+}
+
 var instanceFlag = cli.StringFlag{
 	Name:  "instance, i",
 	Value: "",

@@ -17,7 +17,7 @@ var _ = Describe("Instance", func() {
 			XMLName:        xml.Name{Local: "instance"},
 			Id:             "id",
 			HostName:       "host",
-			App:            "myapp",
+			AppName:        "myapp",
 			IpAddr:         "1.2.3.4",
 			VipAddr:        "vip.address",
 			SecureVipAddr:  "secure.vip.address",

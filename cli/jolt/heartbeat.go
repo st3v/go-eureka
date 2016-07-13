@@ -21,7 +21,7 @@ var heartbeatCmd = cli.Command{
 		instance := getInstance(c, "heartbeat")
 		endpoints := getEndpoints(c, "heartbeat")
 
-		log.Printf("Sending heartbeat for instance '%s' of application '%s'... \n", instance.Id, instance.App)
+		log.Printf("Sending heartbeat for instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
 		client := jolt.NewClient(endpoints)
 		if err := client.Heartbeat(instance); err != nil {
 			log.Fatalf("Error sending heartbeat: %s", err)

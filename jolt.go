@@ -44,12 +44,16 @@ func (c *Client) endpoint() string {
 	return strings.TrimRight(c.endpoints[rand.Intn(len(c.endpoints))], " /")
 }
 
-func (c *Client) appURI(instance Instance) string {
-	return fmt.Sprintf("%s/apps/%s", c.endpoint(), instance.App)
+func (c *Client) appsURI() string {
+	return fmt.Sprintf("%s/apps", c.endpoint())
 }
 
-func (c *Client) instanceURI(instance Instance) string {
-	return fmt.Sprintf("%s/%s", c.appURI(instance), instance.Id)
+func (c *Client) appURI(appName string) string {
+	return fmt.Sprintf("%s/%s", c.appsURI(), appName)
+}
+
+func (c *Client) instanceURI(appName, instanceId string) string {
+	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceId)
 }
 
 func (c *Client) Register(instance Instance) error {
@@ -58,18 +62,42 @@ func (c *Client) Register(instance Instance) error {
 		return err
 	}
 
-	return c.request("POST", c.appURI(instance), data, http.StatusNoContent)
+	return c.do("POST", c.appURI(instance.AppName), data, http.StatusNoContent)
 }
 
 func (c *Client) Deregister(instance Instance) error {
-	return c.request("DELETE", c.instanceURI(instance), nil, http.StatusOK)
+	return c.do("DELETE", c.instanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
 }
 
 func (c *Client) Heartbeat(instance Instance) error {
-	return c.request("PUT", c.instanceURI(instance), nil, http.StatusOK)
+	return c.do("PUT", c.instanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
 }
 
-func (c *Client) request(method, uri string, body []byte, respCode int) error {
+func (c *Client) Apps() ([]App, error) {
+	result := new(struct {
+		Apps []App `xml:"application"`
+	})
+
+	if err := c.get(c.appsURI(), result); err != nil {
+		return nil, err
+	}
+
+	return result.Apps, nil
+}
+
+func (c *Client) App(appName string) (App, error) {
+	app := App{}
+	err := c.get(c.appURI(appName), &app)
+	return app, err
+}
+
+func (c *Client) Instance(appName, instanceId string) (Instance, error) {
+	instance := Instance{}
+	err := c.get(c.instanceURI(appName, instanceId), &instance)
+	return instance, err
+}
+
+func (c *Client) do(method, uri string, body []byte, respCode int) error {
 	req, err := http.NewRequest(method, uri, bytes.NewBuffer(body))
 	if err != nil {
 		return err
@@ -85,6 +113,31 @@ func (c *Client) request(method, uri string, body []byte, respCode int) error {
 
 	if resp.StatusCode != respCode {
 		return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (c *Client) get(uri string, result interface{}) error {
+	req, err := http.NewRequest("GET", uri, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Accept", "application/xml")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	if err := xml.NewDecoder(resp.Body).Decode(result); err != nil {
+		return err
 	}
 
 	return nil
