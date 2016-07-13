@@ -1,4 +1,4 @@
-package jolt_test
+package eureka_test
 
 import (
 	"encoding/xml"
@@ -8,13 +8,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 var _ = Describe("Instance", func() {
 	var (
 		instanceXml []byte
-		instance    = jolt.Instance{
+		instance    = eureka.Instance{
 			XMLName:        xml.Name{Local: "instance"},
 			Id:             "id",
 			HostName:       "host",
@@ -22,18 +22,18 @@ var _ = Describe("Instance", func() {
 			IpAddr:         "1.2.3.4",
 			VipAddr:        "vip.address",
 			SecureVipAddr:  "secure.vip.address",
-			Status:         jolt.StatusOutOfService,
+			Status:         eureka.StatusOutOfService,
 			Port:           80,
 			SecurePort:     443,
 			HomePageUrl:    "home.page.url",
 			StatusPageUrl:  "status.page.url",
 			HealthCheckUrl: "health.check.url",
-			LeaseInfo: jolt.Lease{
+			LeaseInfo: eureka.Lease{
 				EvictionDurationInSecs: 123,
 			},
-			DataCenterInfo: jolt.DataCenter{
-				Type: jolt.DataCenterTypePrivate,
-				Metadata: jolt.AmazonMetadata{
+			DataCenterInfo: eureka.DataCenter{
+				Type: eureka.DataCenterTypePrivate,
+				Metadata: eureka.AmazonMetadata{
 					Hostname:         "dchost",
 					PublicHostName:   "dc.public.host",
 					LocalHostName:    "dc.local.host",
@@ -68,7 +68,7 @@ var _ = Describe("Instance", func() {
 	})
 
 	It("can be unmarshaled from an XML string", func() {
-		var actual jolt.Instance
+		var actual eureka.Instance
 		err := xml.Unmarshal(instanceXml, &actual)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actual).To(Equal(instance))

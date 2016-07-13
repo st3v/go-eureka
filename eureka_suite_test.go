@@ -1,4 +1,4 @@
-package jolt_test
+package eureka_test
 
 import (
 	"encoding/xml"
@@ -10,12 +10,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
-func TestJolt(t *testing.T) {
+func TestEureka(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Jolt")
+	RunSpecs(t, "go-eureka")
 }
 
 func removeIdendation(data []byte) []byte {
@@ -23,25 +23,25 @@ func removeIdendation(data []byte) []byte {
 	return r.ReplaceAll(data, []byte{})
 }
 
-func instanceFixture() (*jolt.Instance, error) {
+func instanceFixture() (*eureka.Instance, error) {
 	fixture, err := os.Open(filepath.Join("fixtures", "instance.xml"))
 	if err != nil {
 		return nil, err
 	}
 
-	instance := new(jolt.Instance)
+	instance := new(eureka.Instance)
 	return instance, xml.NewDecoder(fixture).Decode(&instance)
 }
 
-func appFixture() (*jolt.App, error) {
+func appFixture() (*eureka.App, error) {
 	instance, err := instanceFixture()
 	if err != nil {
 		return nil, err
 	}
 
-	return &jolt.App{
+	return &eureka.App{
 		XMLName:   xml.Name{Local: "application"},
 		Name:      instance.AppName,
-		Instances: []jolt.Instance{*instance},
+		Instances: []eureka.Instance{*instance},
 	}, nil
 }

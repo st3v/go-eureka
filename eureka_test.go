@@ -1,4 +1,4 @@
-package jolt_test
+package eureka_test
 
 import (
 	"encoding/xml"
@@ -11,20 +11,20 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
-var _ = Describe("jolt", func() {
+var _ = Describe("eureka", func() {
 	var (
 		server     *ghttp.Server
-		client     *jolt.Client
-		instance   *jolt.Instance
+		client     *eureka.Client
+		instance   *eureka.Instance
 		statusCode int
 	)
 
 	BeforeEach(func() {
 		server = ghttp.NewServer()
-		client = jolt.NewClient([]string{server.URL()})
+		client = eureka.NewClient([]string{server.URL()})
 
 		var err error
 		instance, err = instanceFixture()
@@ -143,7 +143,7 @@ var _ = Describe("jolt", func() {
 	})
 
 	Describe(".Apps", func() {
-		var app *jolt.App
+		var app *eureka.App
 
 		BeforeEach(func() {
 			var err error
@@ -152,9 +152,9 @@ var _ = Describe("jolt", func() {
 
 			response := struct {
 				XMLName xml.Name   `xml:"applications"`
-				Apps    []jolt.App `xml:"application"`
+				Apps    []eureka.App `xml:"application"`
 			}{
-				Apps: []jolt.App{*app, *app},
+				Apps: []eureka.App{*app, *app},
 			}
 
 			var body []byte
@@ -200,7 +200,7 @@ var _ = Describe("jolt", func() {
 	})
 
 	Describe(".App", func() {
-		var app *jolt.App
+		var app *eureka.App
 
 		BeforeEach(func() {
 			var err error

@@ -5,7 +5,7 @@ import (
 
 	"github.com/codegangsta/cli"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 var deregisterCmd = cli.Command{
@@ -22,7 +22,7 @@ var deregisterCmd = cli.Command{
 		endpoints := getEndpoints(c, "deregister")
 
 		log.Printf("Deregistering instance '%s' for application '%s'... \n", instance.Id, instance.AppName)
-		client := jolt.NewClient(endpoints)
+		client := eureka.NewClient(endpoints)
 		if err := client.Deregister(instance); err != nil {
 			log.Fatalf("Error deregistering instance with Eureka: %s", err)
 		}

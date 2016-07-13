@@ -5,7 +5,7 @@ import (
 
 	"github.com/codegangsta/cli"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 var registerCmd = cli.Command{
@@ -22,7 +22,7 @@ var registerCmd = cli.Command{
 		endpoints := getEndpoints(c, "register")
 
 		log.Printf("Registering instance '%s' for application '%s'... \n", instance.Id, instance.AppName)
-		client := jolt.NewClient(endpoints)
+		client := eureka.NewClient(endpoints)
 		if err := client.Register(instance); err != nil {
 			log.Fatalf("Error registering instance with Eureka: %s", err)
 		}

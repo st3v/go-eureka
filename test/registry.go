@@ -5,16 +5,16 @@ import (
 	"net/http"
 
 	"github.com/emicklei/go-restful"
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 type registry struct {
-	apps map[string]jolt.App
+	apps map[string]eureka.App
 }
 
 func NewRegistry() *registry {
 	return &registry{
-		apps: map[string]jolt.App{},
+		apps: map[string]eureka.App{},
 	}
 }
 
@@ -61,7 +61,7 @@ func (r *registry) register(req *restful.Request, resp *restful.Response) {
 
 	name := req.PathParameter("app-name")
 
-	instance := new(jolt.Instance)
+	instance := new(eureka.Instance)
 	err := req.ReadEntity(instance)
 	if err != nil {
 		resp.WriteHeader(http.StatusNotAcceptable)
@@ -70,9 +70,9 @@ func (r *registry) register(req *restful.Request, resp *restful.Response) {
 
 	app, found := r.apps[name]
 	if !found {
-		app = jolt.App{
+		app = eureka.App{
 			Name:      name,
-			Instances: make([]jolt.Instance, 0, 1),
+			Instances: make([]eureka.Instance, 0, 1),
 		}
 	}
 
@@ -90,7 +90,7 @@ func (r *registry) register(req *restful.Request, resp *restful.Response) {
 }
 
 func (r *registry) list(req *restful.Request, resp *restful.Response) {
-	apps := make([]jolt.App, 0, len(r.apps))
+	apps := make([]eureka.App, 0, len(r.apps))
 
 	for _, app := range r.apps {
 		apps = append(apps, app)
@@ -98,7 +98,7 @@ func (r *registry) list(req *restful.Request, resp *restful.Response) {
 
 	payload := struct {
 		XMLName xml.Name   `xml: "applications"`
-		Apps    []jolt.App `xml: "application"`
+		Apps    []eureka.App `xml: "application"`
 	}{
 		XMLName: xml.Name{Local: "applications"},
 		Apps:    apps,
@@ -147,7 +147,7 @@ func (r *registry) instance(req *restful.Request, resp *restful.Response) {
 	resp.WriteErrorString(http.StatusNotFound, "Instance not found.")
 }
 
-func (r *registry) findInstance(appName, instanceId string) (*jolt.Instance, bool) {
+func (r *registry) findInstance(appName, instanceId string) (*eureka.Instance, bool) {
 	if app, found := r.apps[appName]; found {
 		for _, i := range app.Instances {
 			if i.Id == instanceId {

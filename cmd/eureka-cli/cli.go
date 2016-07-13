@@ -14,7 +14,7 @@ func init() {
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "jolt"
+	app.Name = "eureka-cli"
 	app.Usage = "Command-line client for Netflix Eureka"
 
 	app.Commands = []cli.Command{

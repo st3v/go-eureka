@@ -6,7 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 var instancesCmd = cli.Command{
@@ -21,9 +21,9 @@ var instancesCmd = cli.Command{
 
 	Action: func(c *cli.Context) {
 		endpoints := getEndpoints(c, "heartbeat")
-		client := jolt.NewClient(endpoints)
+		client := eureka.NewClient(endpoints)
 
-		var instances []jolt.Instance
+		var instances []eureka.Instance
 
 		appName := c.String("app")
 		instanceId := c.String("instance")
@@ -67,7 +67,7 @@ var instancesCmd = cli.Command{
 
 		output := struct {
 			XMLName   xml.Name        `xml:"instances"`
-			Instances []jolt.Instance `xml:"instance"`
+			Instances []eureka.Instance `xml:"instance"`
 		}{
 			Instances: instances,
 		}

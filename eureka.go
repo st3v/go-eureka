@@ -1,4 +1,4 @@
-package jolt
+package eureka
 
 import (
 	"bytes"

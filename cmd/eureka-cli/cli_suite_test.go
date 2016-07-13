@@ -13,9 +13,9 @@ import (
 
 var binPath string
 
-func TestJolt(t *testing.T) {
+func TestCLI(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Jolt CLI")
+	RunSpecs(t, "eureka-cli")
 }
 
 func execBin(args ...string) *gexec.Session {
@@ -32,7 +32,7 @@ func removeIdendation(data []byte) []byte {
 
 var _ = BeforeSuite(func() {
 	var err error
-	binPath, err = gexec.Build("github.com/st3v/jolt/cmd/jolt")
+	binPath, err = gexec.Build("github.com/st3v/go-eureka/cmd/eureka-cli")
 	Expect(err).ToNot(HaveOccurred())
 })
 

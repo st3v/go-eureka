@@ -1,3 +1,3 @@
-[![Build Status](https://travis-ci.org/st3v/jolt.svg?branch=master)](https://travis-ci.org/st3v/jolt)
+[![Build Status](https://travis-ci.org/st3v/go-eureka.svg?branch=master)](https://travis-ci.org/st3v/go-eureka)
 
-# jolt
+# go-eureka

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/st3v/jolt/test"
+	"github.com/st3v/go-eureka/test"
 )
 
 const warning = `

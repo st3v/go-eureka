@@ -7,7 +7,7 @@ import (
 
 	"github.com/codegangsta/cli"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 var appNameFlag = cli.StringFlag{
@@ -43,7 +43,7 @@ func getEndpoints(c *cli.Context, cmd string) []string {
 	return endpoints
 }
 
-func getInstance(c *cli.Context, cmd string) jolt.Instance {
+func getInstance(c *cli.Context, cmd string) eureka.Instance {
 	xmlPath := c.String("instance")
 	if xmlPath == "" {
 		cli.ShowCommandHelp(c, cmd)
@@ -55,7 +55,7 @@ func getInstance(c *cli.Context, cmd string) jolt.Instance {
 		log.Fatalf("Error reading instance file: %s", err)
 	}
 
-	var instance jolt.Instance
+	var instance eureka.Instance
 	if err := xml.Unmarshal(data, &instance); err != nil {
 		log.Fatalf("Error parsing instance file: %s", err)
 	}

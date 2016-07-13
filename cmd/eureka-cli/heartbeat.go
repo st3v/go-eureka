@@ -5,7 +5,7 @@ import (
 
 	"github.com/codegangsta/cli"
 
-	"github.com/st3v/jolt"
+	"github.com/st3v/go-eureka"
 )
 
 var heartbeatCmd = cli.Command{
@@ -22,7 +22,7 @@ var heartbeatCmd = cli.Command{
 		endpoints := getEndpoints(c, "heartbeat")
 
 		log.Printf("Sending heartbeat for instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
-		client := jolt.NewClient(endpoints)
+		client := eureka.NewClient(endpoints)
 		if err := client.Heartbeat(instance); err != nil {
 			log.Fatalf("Error sending heartbeat: %s", err)
 		}
