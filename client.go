@@ -10,16 +10,16 @@ import (
 	"time"
 )
 
-type Client struct {
-	endpoints  []string
-	httpClient *http.Client
-}
-
 func init() {
 	rand.Seed(time.Now().Unix())
 }
 
 type Option func(*Client)
+
+type Client struct {
+	endpoints  []string
+	httpClient *http.Client
+}
 
 func HttpClient(c *http.Client) Option {
 	return func(client *Client) {
@@ -38,22 +38,6 @@ func NewClient(endpoints []string, options ...Option) *Client {
 	}
 
 	return c
-}
-
-func (c *Client) endpoint() string {
-	return strings.TrimRight(c.endpoints[rand.Intn(len(c.endpoints))], " /")
-}
-
-func (c *Client) appsURI() string {
-	return fmt.Sprintf("%s/apps", c.endpoint())
-}
-
-func (c *Client) appURI(appName string) string {
-	return fmt.Sprintf("%s/%s", c.appsURI(), appName)
-}
-
-func (c *Client) instanceURI(appName, instanceId string) string {
-	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceId)
 }
 
 func (c *Client) Register(instance Instance) error {
@@ -141,4 +125,20 @@ func (c *Client) get(uri string, result interface{}) error {
 	}
 
 	return nil
+}
+
+func (c *Client) endpoint() string {
+	return strings.TrimRight(c.endpoints[rand.Intn(len(c.endpoints))], " /")
+}
+
+func (c *Client) appsURI() string {
+	return fmt.Sprintf("%s/apps", c.endpoint())
+}
+
+func (c *Client) appURI(appName string) string {
+	return fmt.Sprintf("%s/%s", c.appsURI(), appName)
+}
+
+func (c *Client) instanceURI(appName, instanceId string) string {
+	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceId)
 }
