@@ -6,8 +6,8 @@
     <vipAddress>vip.address</vipAddress>
     <secureVipAddress>secure.vip.address</secureVipAddress>
     <status>OUT_OF_SERVICE</status>
-    <port>80</port>
-    <securePort>443</securePort>
+    <port enabled="true">80</port>
+    <securePort enabled="true">443</securePort>
     <homePageUrl>home.page.url</homePageUrl>
     <statusPageUrl>status.page.url</statusPageUrl>
     <healthCheckUrl>health.check.url</healthCheckUrl>

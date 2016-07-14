@@ -22,14 +22,36 @@ type Instance struct {
 	VipAddr        string     `xml:"vipAddress"`
 	SecureVipAddr  string     `xml:"secureVipAddress"`
 	Status         status     `xml:"status"`
-	Port           int        `xml:"port"`
-	SecurePort     int        `xml:"securePort"`
+	Port           port       `xml:"port"`
+	SecurePort     port       `xml:"securePort"`
 	HomePageUrl    string     `xml:"homePageUrl"`
 	StatusPageUrl  string     `xml:"statusPageUrl"`
 	HealthCheckUrl string     `xml:"healthCheckUrl"`
 	DataCenterInfo DataCenter `xml:"dataCenterInfo"`
 	LeaseInfo      Lease      `xml:"leaseInfo"`
 	Metadata       Metadata   `xml:"metadata"`
+}
+
+type port uint16
+
+type portXML struct {
+	Value   port `xml:",chardata"`
+	Enabled bool `xml:"enabled,attr"`
+}
+
+func (p port) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return e.EncodeElement(portXML{p, p != 0}, start)
+}
+
+func (p *port) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var x portXML
+	if err := d.DecodeElement(&x, &start); err != nil {
+		return err
+	}
+
+	*p = x.Value
+
+	return nil
 }
 
 type Lease struct {
