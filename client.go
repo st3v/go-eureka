@@ -50,11 +50,11 @@ func (c *Client) Register(instance Instance) error {
 }
 
 func (c *Client) Deregister(instance Instance) error {
-	return c.do("DELETE", c.instanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
+	return c.do("DELETE", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
 }
 
 func (c *Client) Heartbeat(instance Instance) error {
-	return c.do("PUT", c.instanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
+	return c.do("PUT", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
 }
 
 func (c *Client) Apps() ([]App, error) {
@@ -75,9 +75,15 @@ func (c *Client) App(appName string) (App, error) {
 	return app, err
 }
 
-func (c *Client) Instance(appName, instanceId string) (Instance, error) {
+func (c *Client) AppInstance(appName, instanceId string) (Instance, error) {
 	instance := Instance{}
-	err := c.get(c.instanceURI(appName, instanceId), &instance)
+	err := c.get(c.appInstanceURI(appName, instanceId), &instance)
+	return instance, err
+}
+
+func (c *Client) Instance(instanceId string) (Instance, error) {
+	instance := Instance{}
+	err := c.get(c.instanceURI(instanceId), &instance)
 	return instance, err
 }
 
@@ -139,6 +145,10 @@ func (c *Client) appURI(appName string) string {
 	return fmt.Sprintf("%s/%s", c.appsURI(), appName)
 }
 
-func (c *Client) instanceURI(appName, instanceId string) string {
+func (c *Client) appInstanceURI(appName, instanceId string) string {
 	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceId)
+}
+
+func (c *Client) instanceURI(instanceId string) string {
+	return fmt.Sprintf("%s/instances/%s", c.endpoint(), instanceId)
 }

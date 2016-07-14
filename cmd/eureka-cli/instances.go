@@ -29,21 +29,25 @@ var instancesCmd = cli.Command{
 		instanceId := c.String("instance")
 
 		switch {
-		case instanceId != "":
-			if appName == "" {
-				cli.ShowCommandHelp(c, "instances")
-				log.Fatalln("--app flag required")
-			}
-
+		case instanceId != "" && appName != "":
 			log.Printf("Retrieving instances for application '%s' and instance id '%s'...", appName, instanceId)
 
-			instance, err := client.Instance(appName, instanceId)
+			instance, err := client.AppInstance(appName, instanceId)
 			if err != nil {
 				log.Fatalf("Error retrieving instance: %s", err)
 			}
 
 			instances = append(instances, instance)
-		case appName != "":
+		case instanceId != "" && appName == "":
+			log.Printf("Retrieving instance with id '%s'...", instanceId)
+
+			instance, err := client.Instance(instanceId)
+			if err != nil {
+				log.Fatalf("Error retrieving instance: %s", err)
+			}
+
+			instances = append(instances, instance)
+		case instanceId == "" && appName != "":
 			log.Printf("Retrieving instances for application '%s'...", appName)
 
 			app, err := client.App(appName)
@@ -66,7 +70,7 @@ var instancesCmd = cli.Command{
 		}
 
 		output := struct {
-			XMLName   xml.Name        `xml:"instances"`
+			XMLName   xml.Name          `xml:"instances"`
 			Instances []eureka.Instance `xml:"instance"`
 		}{
 			Instances: instances,

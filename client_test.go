@@ -151,7 +151,7 @@ var _ = Describe("eureka", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			response := struct {
-				XMLName xml.Name   `xml:"applications"`
+				XMLName xml.Name     `xml:"applications"`
 				Apps    []eureka.App `xml:"application"`
 			}{
 				Apps: []eureka.App{*app, *app},
@@ -231,7 +231,7 @@ var _ = Describe("eureka", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("returns the correct apps", func() {
+		It("returns the correct app", func() {
 			actual, _ := client.App(app.Name)
 			Expect(actual).To(Equal(*app))
 		})
@@ -248,7 +248,7 @@ var _ = Describe("eureka", func() {
 		})
 	})
 
-	Describe(".Instance", func() {
+	Describe(".AppInstance", func() {
 		BeforeEach(func() {
 			var err error
 			instance, err = instanceFixture()
@@ -269,17 +269,17 @@ var _ = Describe("eureka", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.Instance(instance.AppName, instance.Id)
+			client.AppInstance(instance.AppName, instance.Id)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			_, err := client.Instance(instance.AppName, instance.Id)
+			_, err := client.AppInstance(instance.AppName, instance.Id)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("returns the correct apps", func() {
-			actual, _ := client.Instance(instance.AppName, instance.Id)
+		It("returns the correct instance", func() {
+			actual, _ := client.AppInstance(instance.AppName, instance.Id)
 			Expect(actual).To(Equal(*instance))
 		})
 
@@ -289,10 +289,56 @@ var _ = Describe("eureka", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.Instance(instance.AppName, instance.Id)
+				_, err := client.AppInstance(instance.AppName, instance.Id)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
 	})
 
+	Describe(".Instance", func() {
+		BeforeEach(func() {
+			var err error
+			instance, err = instanceFixture()
+			Expect(err).ToNot(HaveOccurred())
+
+			var body []byte
+			body, err = xml.Marshal(instance)
+			Expect(err).ToNot(HaveOccurred())
+
+			route := fmt.Sprintf("/instances/%s", instance.Id)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", route),
+					ghttp.RespondWithPtr(&statusCode, &body),
+				),
+			)
+		})
+
+		It("sends the correct request", func() {
+			client.Instance(instance.Id)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		It("returns no error", func() {
+			_, err := client.Instance(instance.Id)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("returns the correct instance", func() {
+			actual, _ := client.Instance(instance.Id)
+			Expect(actual).To(Equal(*instance))
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				_, err := client.Instance(instance.Id)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
 })

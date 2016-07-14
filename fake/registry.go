@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/emicklei/go-restful"
+
 	"github.com/st3v/go-eureka"
 )
 
@@ -25,32 +26,21 @@ func (r *registry) HttpServer(addr string, debug bool) *http.Server {
 		restful.TraceLogger(log.New(os.Stdout, "[restful] ", log.LstdFlags|log.Lshortfile))
 	}
 
-	s := new(restful.WebService).Path("/apps").Produces(restful.MIME_XML)
-	s.Route(s.POST("/{app-name}").To(r.register).Consumes(restful.MIME_XML))
-	s.Route(s.DELETE("/{app-name}/{instance-id}").To(r.deregister))
-	s.Route(s.PUT("/{app-name}/{instance-id}").To(r.heartbeat))
-	s.Route(s.GET("/").To(r.list))
-	s.Route(s.GET("/{app-name}").To(r.app))
-	s.Route(s.GET("/{app-name}/{instance-id}").To(r.instance))
+	s := new(restful.WebService)
+
+	s.Path("/").Produces(restful.MIME_XML)
+	s.Route(s.POST("/apps/{app-name}").To(r.register).Consumes(restful.MIME_XML))
+	s.Route(s.DELETE("/apps/{app-name}/{instance-id}").To(r.deregister))
+	s.Route(s.PUT("/apps/{app-name}/{instance-id}").To(r.heartbeat))
+	s.Route(s.GET("/apps").To(r.list))
+	s.Route(s.GET("/apps/{app-name}").To(r.app))
+	s.Route(s.GET("/apps/{app-name}/{instance-id}").To(r.appInstance))
+	s.Route(s.GET("/instances/{instance-id}").To(r.instance))
 
 	return &http.Server{
 		Addr:    addr,
 		Handler: restful.NewContainer().Add(s),
 	}
-}
-
-func (r *registry) service() *restful.WebService {
-	s := new(restful.WebService)
-
-	s.Path("/apps").Produces(restful.MIME_XML)
-	s.Route(s.POST("/{app-name}").To(r.register).Consumes(restful.MIME_XML))
-	s.Route(s.DELETE("/{app-name}/{instance-id}").To(r.deregister))
-	s.Route(s.PUT("/{app-name}/{instance-id}").To(r.heartbeat))
-	s.Route(s.GET("/").To(r.list))
-	s.Route(s.GET("/{app-name}").To(r.app))
-	s.Route(s.GET("/{app-name}/{instance-id}").To(r.instance))
-
-	return s
 }
 
 func (r *registry) deregister(req *restful.Request, resp *restful.Response) {
@@ -147,7 +137,7 @@ func (r *registry) heartbeat(req *restful.Request, resp *restful.Response) {
 	name := req.PathParameter("app-name")
 	instanceId := req.PathParameter("instance-id")
 
-	if _, found := r.findInstance(name, instanceId); !found {
+	if _, found := r.findAppInstance(name, instanceId); !found {
 		resp.WriteErrorString(http.StatusNotFound, "Instance not found.")
 		return
 	}
@@ -156,10 +146,9 @@ func (r *registry) heartbeat(req *restful.Request, resp *restful.Response) {
 }
 
 func (r *registry) instance(req *restful.Request, resp *restful.Response) {
-	name := req.PathParameter("app-name")
 	instanceId := req.PathParameter("instance-id")
 
-	if i, found := r.findInstance(name, instanceId); found {
+	if i, found := findInstance(instanceId, r.apps); found {
 		resp.WriteEntity(i)
 		return
 	}
@@ -168,13 +157,35 @@ func (r *registry) instance(req *restful.Request, resp *restful.Response) {
 	resp.WriteErrorString(http.StatusNotFound, "Instance not found.")
 }
 
-func (r *registry) findInstance(appName, instanceId string) (*eureka.Instance, bool) {
+func (r *registry) appInstance(req *restful.Request, resp *restful.Response) {
+	name := req.PathParameter("app-name")
+	instanceId := req.PathParameter("instance-id")
+
+	if i, found := r.findAppInstance(name, instanceId); found {
+		resp.WriteEntity(i)
+		return
+	}
+
+	resp.AddHeader("Content-Type", "text/plain")
+	resp.WriteErrorString(http.StatusNotFound, "Instance not found.")
+}
+
+func (r *registry) findAppInstance(appName, instanceId string) (*eureka.Instance, bool) {
 	if app, found := r.apps[appName]; found {
-		for _, i := range app.Instances {
+		return findInstance(instanceId, map[string]eureka.App{app.Name: app})
+	}
+
+	return nil, false
+}
+
+func findInstance(instanceId string, apps map[string]eureka.App) (*eureka.Instance, bool) {
+	for _, a := range apps {
+		for _, i := range a.Instances {
 			if i.Id == instanceId {
 				return &i, true
 			}
 		}
 	}
+
 	return nil, false
 }
