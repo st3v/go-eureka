@@ -1,7 +1,6 @@
 package fake
 
 import (
-	"encoding/xml"
 	"log"
 	"net/http"
 	"os"
@@ -107,15 +106,11 @@ func (r *registry) list(req *restful.Request, resp *restful.Response) {
 		apps = append(apps, app)
 	}
 
-	payload := struct {
-		XMLName xml.Name     `xml: "applications"`
-		Apps    []eureka.App `xml: "application"`
-	}{
-		XMLName: xml.Name{Local: "applications"},
-		Apps:    apps,
+	result := eureka.Registry{
+		Apps: apps,
 	}
 
-	resp.WriteEntity(payload)
+	resp.WriteEntity(result)
 }
 
 func (r *registry) app(req *restful.Request, resp *restful.Response) {

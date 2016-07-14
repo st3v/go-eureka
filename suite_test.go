@@ -28,6 +28,7 @@ func instanceFixture() (*eureka.Instance, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer fixture.Close()
 
 	instance := new(eureka.Instance)
 	return instance, xml.NewDecoder(fixture).Decode(&instance)

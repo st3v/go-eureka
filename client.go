@@ -58,10 +58,7 @@ func (c *Client) Heartbeat(instance Instance) error {
 }
 
 func (c *Client) Apps() ([]App, error) {
-	result := new(struct {
-		Apps []App `xml:"application"`
-	})
-
+	result := new(Registry)
 	if err := c.get(c.appsURI(), result); err != nil {
 		return nil, err
 	}

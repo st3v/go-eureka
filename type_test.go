@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io/ioutil"
 	"path/filepath"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,7 +30,12 @@ var _ = Describe("Instance", func() {
 			StatusPageUrl:  "status.page.url",
 			HealthCheckUrl: "health.check.url",
 			LeaseInfo: eureka.Lease{
-				EvictionDurationInSecs: 123,
+				RenewalInterval:  eureka.Duration(30 * time.Second),
+				Duration:         eureka.Duration(90 * time.Second),
+				RegistrationTime: eureka.Time(time.Unix(0, 1468519783576*int64(time.Millisecond))),
+				LastRenewalTime:  eureka.Time(time.Unix(0, 1468519783577*int64(time.Millisecond))),
+				EvictionTime:     eureka.Time(time.Unix(0, 1468519783578*int64(time.Millisecond))),
+				ServiceUpTime:    eureka.Time(time.Unix(0, 1468519783579*int64(time.Millisecond))),
 			},
 			DataCenterInfo: eureka.DataCenter{
 				Type: eureka.DataCenterTypePrivate,

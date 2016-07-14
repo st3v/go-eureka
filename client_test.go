@@ -150,10 +150,7 @@ var _ = Describe("eureka", func() {
 			app, err = appFixture()
 			Expect(err).ToNot(HaveOccurred())
 
-			response := struct {
-				XMLName xml.Name     `xml:"applications"`
-				Apps    []eureka.App `xml:"application"`
-			}{
+			response := eureka.Registry{
 				Apps: []eureka.App{*app, *app},
 			}
 

@@ -28,7 +28,12 @@
         </metadata>
     </dataCenterInfo>
     <leaseInfo>
-        <evictionDurationInSecs>123</evictionDurationInSecs>
+        <renewalIntervalInSecs>30</renewalIntervalInSecs>
+        <durationInSecs>90</durationInSecs>
+        <registrationTimestamp>1468519783576</registrationTimestamp>
+        <lastRenewalTimestamp>1468519783577</lastRenewalTimestamp>
+        <evictionTimestamp>1468519783578</evictionTimestamp>
+        <serviceUpTimestamp>1468519783579</serviceUpTimestamp>
     </leaseInfo>
     <metadata>
         <a>one</a>
