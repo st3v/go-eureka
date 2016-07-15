@@ -138,11 +138,28 @@ var statusNames = []string{
 	"UNKNOWN",
 }
 
-func (s Status) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	if int(s) >= len(statusNames) {
-		return fmt.Errorf("Unknown status code: %d", s)
+func ParseStatus(name string) (status Status, err error) {
+	for i, n := range statusNames {
+		if n == name {
+			status = Status(i)
+			return
+		}
 	}
-	return e.EncodeElement(statusNames[s], start)
+
+	err = fmt.Errorf("Unknown status '%s'", name)
+	return
+}
+
+func (s Status) String() string {
+	if int(s) >= len(statusNames) {
+		s = StatusUnknown
+	}
+
+	return statusNames[s]
+}
+
+func (s Status) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return e.EncodeElement(s.String(), start)
 }
 
 func (s *Status) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -151,12 +168,12 @@ func (s *Status) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		return err
 	}
 
-	for i, n := range statusNames {
-		if n == str {
-			*s = Status(i)
-			return nil
-		}
+	if str == "" {
+		*s = StatusUnknown
+		return nil
 	}
 
-	return fmt.Errorf("Unknown status: %s", str)
+	var err error
+	*s, err = ParseStatus(str)
+	return err
 }

@@ -84,6 +84,14 @@ func (c *Client) Instance(instanceId string) (Instance, error) {
 	return instance, err
 }
 
+func (c *Client) StatusOverride(instance Instance, status Status) error {
+	return c.do("PUT", c.appInstanceStatusURI(instance.AppName, instance.Id, status), nil, http.StatusOK)
+}
+
+func (c *Client) RemoveStatusOverride(instance Instance, fallback Status) error {
+	return c.do("DELETE", c.appInstanceStatusURI(instance.AppName, instance.Id, fallback), nil, http.StatusOK)
+}
+
 func (c *Client) do(method, uri string, body []byte, respCode int) error {
 	req, err := http.NewRequest(method, uri, bytes.NewBuffer(body))
 	if err != nil {
@@ -148,4 +156,8 @@ func (c *Client) appInstanceURI(appName, instanceId string) string {
 
 func (c *Client) instanceURI(instanceId string) string {
 	return fmt.Sprintf("%s/instances/%s", c.endpoint(), instanceId)
+}
+
+func (c *Client) appInstanceStatusURI(appName, instanceId string, status Status) string {
+	return fmt.Sprintf("%s/status?value=%s", c.appInstanceURI(appName, instanceId), status)
 }

@@ -338,4 +338,76 @@ var _ = Describe("eureka", func() {
 			})
 		})
 	})
+
+	Describe(".StatusOverride", func() {
+		var status = eureka.StatusDown
+
+		BeforeEach(func() {
+			route := fmt.Sprintf("/apps/%s/%s/status", instance.AppName, instance.Id)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PUT", route, fmt.Sprintf("value=%s", status)),
+					ghttp.RespondWithPtr(&statusCode, nil),
+				),
+			)
+		})
+
+		It("sends the correct request", func() {
+			client.StatusOverride(*instance, status)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		It("returns no error", func() {
+			err := client.StatusOverride(*instance, status)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				err := client.StatusOverride(*instance, status)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
+
+	Describe(".RemoveStatusOverride", func() {
+		var fallback = eureka.StatusDown
+
+		BeforeEach(func() {
+			route := fmt.Sprintf("/apps/%s/%s/status", instance.AppName, instance.Id)
+			statusCode = http.StatusOK
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("DELETE", route, fmt.Sprintf("value=%s", fallback)),
+					ghttp.RespondWithPtr(&statusCode, nil),
+				),
+			)
+		})
+
+		It("sends the correct request", func() {
+			client.RemoveStatusOverride(*instance, fallback)
+			Expect(server.ReceivedRequests()).To(HaveLen(1))
+		})
+
+		It("returns no error", func() {
+			err := client.RemoveStatusOverride(*instance, fallback)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		Context("when the request fails", func() {
+			BeforeEach(func() {
+				statusCode = http.StatusInternalServerError
+			})
+
+			It("returns an error", func() {
+				err := client.RemoveStatusOverride(*instance, fallback)
+				Expect(err).To(MatchError("Unexpected response code 500"))
+			})
+		})
+	})
 })

@@ -5,7 +5,8 @@
     <ipAddr>1.2.3.4</ipAddr>
     <vipAddress>vip.address</vipAddress>
     <secureVipAddress>secure.vip.address</secureVipAddress>
-    <status>OUT_OF_SERVICE</status>
+    <status>UP</status>
+    <overridenstatus>UNKNOWN</overridenstatus>
     <port enabled="true">80</port>
     <securePort enabled="true">443</securePort>
     <homePageUrl>home.page.url</homePageUrl>

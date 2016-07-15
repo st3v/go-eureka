@@ -22,6 +22,8 @@ func main() {
 		deregisterCmd,
 		heartbeatCmd,
 		instancesCmd,
+		overrideCmd,
+		removeOverrideCmd,
 	}
 
 	app.Run(os.Args)

@@ -14,6 +14,7 @@ type Instance struct {
 	VipAddr        string     `xml:"vipAddress"`
 	SecureVipAddr  string     `xml:"secureVipAddress"`
 	Status         Status     `xml:"status"`
+	StatusOverride Status     `xml:"overridenstatus"`
 	Port           Port       `xml:"port"`
 	SecurePort     Port       `xml:"securePort"`
 	HomePageUrl    string     `xml:"homePageUrl"`
