@@ -41,8 +41,8 @@ var overrideCmd = cli.Command{
 	},
 
 	Action: func(c *cli.Context) {
-		instance := getInstance(c, "heartbeat")
-		endpoints := getEndpoints(c, "heartbeat")
+		instance := getInstance(c, "override-status")
+		endpoints := getEndpoints(c, "override-status")
 		status := getStatus(c, true)
 
 		log.Printf("Overriding status for instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
@@ -65,8 +65,8 @@ var removeOverrideCmd = cli.Command{
 	},
 
 	Action: func(c *cli.Context) {
-		instance := getInstance(c, "heartbeat")
-		endpoints := getEndpoints(c, "heartbeat")
+		instance := getInstance(c, "remove-override")
+		endpoints := getEndpoints(c, "remove-override")
 		status := getStatus(c, false)
 
 		log.Printf("Remove overridden status from instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
