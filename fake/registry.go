@@ -34,6 +34,8 @@ func (r *registry) HttpServer(addr string, debug bool) *http.Server {
 	s.Route(s.GET("/apps").To(r.list))
 	s.Route(s.GET("/apps/{app-name}").To(r.app))
 	s.Route(s.GET("/apps/{app-name}/{instance-id}").To(r.appInstance))
+	s.Route(s.PUT("/apps/{app-name}/{instance-id}/status").To(r.statusOverride))
+	s.Route(s.DELETE("/apps/{app-name}/{instance-id}/status").To(r.removeStatusOverride))
 	s.Route(s.GET("/instances/{instance-id}").To(r.instance))
 
 	return &http.Server{
@@ -163,6 +165,49 @@ func (r *registry) appInstance(req *restful.Request, resp *restful.Response) {
 
 	resp.AddHeader("Content-Type", "text/plain")
 	resp.WriteErrorString(http.StatusNotFound, "Instance not found.")
+}
+
+func (r *registry) statusOverride(req *restful.Request, resp *restful.Response) {
+	value := req.QueryParameter("value")
+	status, err := eureka.ParseStatus(value)
+	if value == "" || err != nil {
+		resp.WriteErrorString(http.StatusNotAcceptable, "Invalid status")
+		return
+	}
+
+	name := req.PathParameter("app-name")
+	instanceId := req.PathParameter("instance-id")
+
+	instance, found := r.findAppInstance(name, instanceId)
+	if !found {
+		resp.WriteErrorString(http.StatusNotFound, "Instance not registered")
+		return
+	}
+
+	instance.Status = status
+	instance.StatusOverride = status
+}
+
+func (r *registry) removeStatusOverride(req *restful.Request, resp *restful.Response) {
+	value := req.QueryParameter("value")
+
+	status, err := eureka.ParseStatus(value)
+	if err != nil {
+		resp.WriteErrorString(http.StatusNotAcceptable, "Invalid status")
+		return
+	}
+
+	name := req.PathParameter("app-name")
+	instanceId := req.PathParameter("instance-id")
+
+	instance, found := r.findAppInstance(name, instanceId)
+	if !found {
+		resp.WriteErrorString(http.StatusNotFound, "Instance not registered")
+		return
+	}
+
+	instance.Status = status
+	instance.StatusOverride = eureka.StatusUnknown
 }
 
 func (r *registry) findAppInstance(appName, instanceId string) (*eureka.Instance, bool) {
