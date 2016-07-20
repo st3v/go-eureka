@@ -1,20 +1,31 @@
+sudo: required
+
 language: go
+
+dist: trusty
+
+group: edge
+
+services:
+- docker
+
 matrix:
   include:
     - go: '1.6'
+
 before_script:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/modocache/gover
   - go get github.com/mattn/goveralls
   - go get github.com/onsi/ginkgo/ginkgo
   - go get github.com/onsi/gomega
+  - go get github.com/st3v/waitfor/...
   - go get -v ./...
+
 script:
-  - ginkgo -r -race -randomizeAllSpecs -cover
-  - find ./cmd -name "*.coverprofile" -type f -delete
-  - gover
-  - goveralls -service travis-ci -coverprofile=gover.coverprofile -repotoken $COVERALL_TOKEN
-sudo: false
+  - docker run -d -p 8080:8080 netflixoss/eureka:1.3.1 && waitfor curl http://localhost:8080/eureka/v2/apps -t 2m && ginkgo -r -race -randomizeAllSpecs -cover -tags integration && find ./cmd -name "*.coverprofile" -type f -delete && gover && goveralls -service travis-ci -coverprofile=gover.coverprofile -repotoken $COVERALL_TOKEN
+
 env:
   global:
+    - EUREKA_URLS="http://localhost:8080/eureka/v2"
     - secure: "kzs+4NrJ5UIqhG9lbYYSXSajy19Es8nkPN5PjgMLtu9VndBlumalYbMdT6YHWAHY8yV+qWyHz1EohF3GmSZlzsI1kS1SCLjCybCaf723F9B4dL5WJWtUIfnGwxgO5M5x99HMlS7f9z9hEwnyHTpnHJbj+cdowDpIatqfLjZGDU2Q31BAPJK1n/2xoIc+CNY5twtugfCkkkpbrB3wgBTIzLxZmiGNxUuH1tyR8HozkCkN46xthu+149Mh3G+MEMxZbbLbHQra9c0wX/25Zxd8mSJAyqi/1D6h59jPZx4aEBqMft9s+YagRzHY02v/v/+iT1tDpx8byase3k2itbYqTocSVH1ZdSdJU4r64o799L/g7aJeuK/8Z5WFX5gzM9ROkJ1ufry1Ncas2cX7cJZCpB3zstNVQbTSyQ89dg0NeGBHC1F6S4op7WqaNglTo79cdA7oTdJaZjYFtXuhmReizzxkdYLxJcbZoScNpIYtRtgXvUpeJifYZ8M+sXySrjGScGbU5eDsxYjm5bwFr0JUxu8fEJJ4S2CHOkxwcFkZa7jEr3DzS++tbgG3cP/sQ59rlu1FPoq6GFCJJQNTjKru+NkLFzbAMeryhuQBIlVAckpUN1t2JF4gqZYTN6lNnoZ+NETReZWbsNQTNCV29eE+RXybY/2MsD4fA14J2u2d5Nc="

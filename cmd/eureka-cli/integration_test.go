@@ -20,7 +20,7 @@ var _ = Describe("CLI", func() {
 		instanceFilePaths []string
 		session           *gexec.Session
 
-		timeout = 2 * time.Minute
+		timeout = 5 * time.Minute
 	)
 
 	BeforeEach(func() {
