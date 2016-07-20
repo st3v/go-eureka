@@ -40,7 +40,7 @@ func NewClient(endpoints []string, options ...Option) *Client {
 	return c
 }
 
-func (c *Client) Register(instance Instance) error {
+func (c *Client) Register(instance *Instance) error {
 	data, err := xml.Marshal(instance)
 	if err != nil {
 		return err
@@ -49,15 +49,15 @@ func (c *Client) Register(instance Instance) error {
 	return c.do("POST", c.appURI(instance.AppName), data, http.StatusNoContent)
 }
 
-func (c *Client) Deregister(instance Instance) error {
+func (c *Client) Deregister(instance *Instance) error {
 	return c.do("DELETE", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
 }
 
-func (c *Client) Heartbeat(instance Instance) error {
+func (c *Client) Heartbeat(instance *Instance) error {
 	return c.do("PUT", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
 }
 
-func (c *Client) Apps() ([]App, error) {
+func (c *Client) Apps() ([]*App, error) {
 	result := new(Registry)
 	if err := c.get(c.appsURI(), result); err != nil {
 		return nil, err
@@ -66,29 +66,29 @@ func (c *Client) Apps() ([]App, error) {
 	return result.Apps, nil
 }
 
-func (c *Client) App(appName string) (App, error) {
-	app := App{}
-	err := c.get(c.appURI(appName), &app)
+func (c *Client) App(appName string) (*App, error) {
+	app := new(App)
+	err := c.get(c.appURI(appName), app)
 	return app, err
 }
 
-func (c *Client) AppInstance(appName, instanceId string) (Instance, error) {
-	instance := Instance{}
-	err := c.get(c.appInstanceURI(appName, instanceId), &instance)
+func (c *Client) AppInstance(appName, instanceId string) (*Instance, error) {
+	instance := new(Instance)
+	err := c.get(c.appInstanceURI(appName, instanceId), instance)
 	return instance, err
 }
 
-func (c *Client) Instance(instanceId string) (Instance, error) {
-	instance := Instance{}
-	err := c.get(c.instanceURI(instanceId), &instance)
+func (c *Client) Instance(instanceId string) (*Instance, error) {
+	instance := new(Instance)
+	err := c.get(c.instanceURI(instanceId), instance)
 	return instance, err
 }
 
-func (c *Client) StatusOverride(instance Instance, status Status) error {
+func (c *Client) StatusOverride(instance *Instance, status Status) error {
 	return c.do("PUT", c.appInstanceStatusURI(instance.AppName, instance.Id, status), nil, http.StatusOK)
 }
 
-func (c *Client) RemoveStatusOverride(instance Instance, fallback Status) error {
+func (c *Client) RemoveStatusOverride(instance *Instance, fallback Status) error {
 	return c.do("DELETE", c.appInstanceStatusURI(instance.AppName, instance.Id, fallback), nil, http.StatusOK)
 }
 

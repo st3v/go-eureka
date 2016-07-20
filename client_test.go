@@ -53,12 +53,12 @@ var _ = Describe("eureka", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.Register(*instance)
+			client.Register(instance)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			err := client.Register(*instance)
+			err := client.Register(instance)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -68,7 +68,7 @@ var _ = Describe("eureka", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.Register(*instance)
+				err := client.Register(instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -87,12 +87,12 @@ var _ = Describe("eureka", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.Deregister(*instance)
+			client.Deregister(instance)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			err := client.Deregister(*instance)
+			err := client.Deregister(instance)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -102,7 +102,7 @@ var _ = Describe("eureka", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.Deregister(*instance)
+				err := client.Deregister(instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -121,12 +121,12 @@ var _ = Describe("eureka", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.Heartbeat(*instance)
+			client.Heartbeat(instance)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			err := client.Heartbeat(*instance)
+			err := client.Heartbeat(instance)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -136,7 +136,7 @@ var _ = Describe("eureka", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.Heartbeat(*instance)
+				err := client.Heartbeat(instance)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -151,7 +151,7 @@ var _ = Describe("eureka", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			response := eureka.Registry{
-				Apps: []eureka.App{*app, *app},
+				Apps: []*eureka.App{app, app},
 			}
 
 			var body []byte
@@ -180,8 +180,8 @@ var _ = Describe("eureka", func() {
 		It("returns the correct apps", func() {
 			apps, _ := client.Apps()
 			Expect(apps).To(HaveLen(2))
-			Expect(apps[0]).To(Equal(*app))
-			Expect(apps[1]).To(Equal(*app))
+			Expect(apps[0]).To(Equal(app))
+			Expect(apps[1]).To(Equal(app))
 		})
 
 		Context("when the request fails", func() {
@@ -230,7 +230,7 @@ var _ = Describe("eureka", func() {
 
 		It("returns the correct app", func() {
 			actual, _ := client.App(app.Name)
-			Expect(actual).To(Equal(*app))
+			Expect(actual).To(Equal(app))
 		})
 
 		Context("when the request fails", func() {
@@ -277,7 +277,7 @@ var _ = Describe("eureka", func() {
 
 		It("returns the correct instance", func() {
 			actual, _ := client.AppInstance(instance.AppName, instance.Id)
-			Expect(actual).To(Equal(*instance))
+			Expect(actual).To(Equal(instance))
 		})
 
 		Context("when the request fails", func() {
@@ -324,7 +324,7 @@ var _ = Describe("eureka", func() {
 
 		It("returns the correct instance", func() {
 			actual, _ := client.Instance(instance.Id)
-			Expect(actual).To(Equal(*instance))
+			Expect(actual).To(Equal(instance))
 		})
 
 		Context("when the request fails", func() {
@@ -354,12 +354,12 @@ var _ = Describe("eureka", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.StatusOverride(*instance, status)
+			client.StatusOverride(instance, status)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			err := client.StatusOverride(*instance, status)
+			err := client.StatusOverride(instance, status)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -369,7 +369,7 @@ var _ = Describe("eureka", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.StatusOverride(*instance, status)
+				err := client.StatusOverride(instance, status)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -390,12 +390,12 @@ var _ = Describe("eureka", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.RemoveStatusOverride(*instance, fallback)
+			client.RemoveStatusOverride(instance, fallback)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			err := client.RemoveStatusOverride(*instance, fallback)
+			err := client.RemoveStatusOverride(instance, fallback)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -405,7 +405,7 @@ var _ = Describe("eureka", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.RemoveStatusOverride(*instance, fallback)
+				err := client.RemoveStatusOverride(instance, fallback)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})

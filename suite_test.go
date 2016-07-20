@@ -43,6 +43,6 @@ func appFixture() (*eureka.App, error) {
 	return &eureka.App{
 		XMLName:   xml.Name{Local: "application"},
 		Name:      instance.AppName,
-		Instances: []eureka.Instance{*instance},
+		Instances: []*eureka.Instance{instance},
 	}, nil
 }

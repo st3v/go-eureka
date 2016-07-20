@@ -79,14 +79,14 @@ type Time time.Time
 type Metadata map[string]string
 
 type App struct {
-	XMLName   xml.Name   `xml:"application"`
-	Name      string     `xml:"name"`
-	Instances []Instance `xml:"instance"`
+	XMLName   xml.Name    `xml:"application"`
+	Name      string      `xml:"name"`
+	Instances []*Instance `xml:"instance"`
 }
 
 type Registry struct {
 	XMLName      xml.Name `xml:"applications"`
 	VersionDelta int      `xml:"versions__delta"`
 	Hashcode     string   `xml:"apps__hashcode"`
-	Apps         []App    `xml:"application"`
+	Apps         []*App   `xml:"application"`
 }

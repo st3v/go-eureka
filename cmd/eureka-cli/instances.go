@@ -23,7 +23,7 @@ var instancesCmd = cli.Command{
 		endpoints := getEndpoints(c, "heartbeat")
 		client := eureka.NewClient(endpoints)
 
-		var instances []eureka.Instance
+		var instances []*eureka.Instance
 
 		appName := c.String("app")
 		instanceId := c.String("instance")
@@ -70,8 +70,8 @@ var instancesCmd = cli.Command{
 		}
 
 		output := struct {
-			XMLName   xml.Name          `xml:"instances"`
-			Instances []eureka.Instance `xml:"instance"`
+			XMLName   xml.Name           `xml:"instances"`
+			Instances []*eureka.Instance `xml:"instance"`
 		}{
 			Instances: instances,
 		}

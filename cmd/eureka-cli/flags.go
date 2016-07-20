@@ -43,7 +43,7 @@ func getEndpoints(c *cli.Context, cmd string) []string {
 	return endpoints
 }
 
-func getInstance(c *cli.Context, cmd string) eureka.Instance {
+func getInstance(c *cli.Context, cmd string) *eureka.Instance {
 	xmlPath := c.String("instance")
 	if xmlPath == "" {
 		cli.ShowCommandHelp(c, cmd)
@@ -55,8 +55,8 @@ func getInstance(c *cli.Context, cmd string) eureka.Instance {
 		log.Fatalf("Error reading instance file: %s", err)
 	}
 
-	var instance eureka.Instance
-	if err := xml.Unmarshal(data, &instance); err != nil {
+	instance := new(eureka.Instance)
+	if err := xml.Unmarshal(data, instance); err != nil {
 		log.Fatalf("Error parsing instance file: %s", err)
 	}
 

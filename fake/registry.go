@@ -11,12 +11,12 @@ import (
 )
 
 type registry struct {
-	apps map[string]eureka.App
+	apps map[string]*eureka.App
 }
 
 func NewRegistry() *registry {
 	return &registry{
-		apps: map[string]eureka.App{},
+		apps: map[string]*eureka.App{},
 	}
 }
 
@@ -80,9 +80,9 @@ func (r *registry) register(req *restful.Request, resp *restful.Response) {
 
 	app, found := r.apps[name]
 	if !found {
-		app = eureka.App{
+		app = &eureka.App{
 			Name:      name,
-			Instances: make([]eureka.Instance, 0, 1),
+			Instances: make([]*eureka.Instance, 0, 1),
 		}
 	}
 
@@ -93,14 +93,14 @@ func (r *registry) register(req *restful.Request, resp *restful.Response) {
 		}
 	}
 
-	app.Instances = append(app.Instances, *instance)
+	app.Instances = append(app.Instances, instance)
 
 	r.apps[name] = app
 	resp.WriteHeader(http.StatusNoContent)
 }
 
 func (r *registry) list(req *restful.Request, resp *restful.Response) {
-	apps := make([]eureka.App, 0, len(r.apps))
+	apps := make([]*eureka.App, 0, len(r.apps))
 
 	for _, app := range r.apps {
 		apps = append(apps, app)
@@ -167,17 +167,17 @@ func (r *registry) appInstance(req *restful.Request, resp *restful.Response) {
 
 func (r *registry) findAppInstance(appName, instanceId string) (*eureka.Instance, bool) {
 	if app, found := r.apps[appName]; found {
-		return findInstance(instanceId, map[string]eureka.App{app.Name: app})
+		return findInstance(instanceId, map[string]*eureka.App{app.Name: app})
 	}
 
 	return nil, false
 }
 
-func findInstance(instanceId string, apps map[string]eureka.App) (*eureka.Instance, bool) {
+func findInstance(instanceId string, apps map[string]*eureka.App) (*eureka.Instance, bool) {
 	for _, a := range apps {
 		for _, i := range a.Instances {
 			if i.Id == instanceId {
-				return &i, true
+				return i, true
 			}
 		}
 	}
