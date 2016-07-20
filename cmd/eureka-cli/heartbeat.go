@@ -17,16 +17,18 @@ var heartbeatCmd = cli.Command{
 		endpointsFlag,
 	},
 
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		instance := getInstance(c, "heartbeat")
 		endpoints := getEndpoints(c, "heartbeat")
 
 		log.Printf("Sending heartbeat for instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.Heartbeat(instance); err != nil {
-			log.Fatalf("Error sending heartbeat: %s", err)
+			log.Printf("Error sending heartbeat: %s\n", err)
+			return err
 		}
 
 		log.Println("Success")
+		return nil
 	},
 }

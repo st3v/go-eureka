@@ -19,7 +19,7 @@ var instancesCmd = cli.Command{
 		instanceIdFlag,
 	},
 
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		endpoints := getEndpoints(c, "heartbeat")
 		client := eureka.NewClient(endpoints)
 
@@ -34,7 +34,8 @@ var instancesCmd = cli.Command{
 
 			instance, err := client.AppInstance(appName, instanceId)
 			if err != nil {
-				log.Fatalf("Error retrieving instance: %s", err)
+				log.Printf("Error retrieving instance: %s\n", err)
+				return err
 			}
 
 			instances = append(instances, instance)
@@ -43,7 +44,8 @@ var instancesCmd = cli.Command{
 
 			instance, err := client.Instance(instanceId)
 			if err != nil {
-				log.Fatalf("Error retrieving instance: %s", err)
+				log.Printf("Error retrieving instance: %s\n", err)
+				return err
 			}
 
 			instances = append(instances, instance)
@@ -52,7 +54,8 @@ var instancesCmd = cli.Command{
 
 			app, err := client.App(appName)
 			if err != nil {
-				log.Fatalf("Error retrieving application: %s", err)
+				log.Printf("Error retrieving application: %s\n", err)
+				return err
 			}
 
 			instances = append(instances, app.Instances...)
@@ -61,7 +64,8 @@ var instancesCmd = cli.Command{
 
 			apps, err := client.Apps()
 			if err != nil {
-				log.Fatalf("Error retrieving applications: ", err)
+				log.Printf("Error retrieving applications: %s\n", err)
+				return err
 			}
 
 			for _, app := range apps {
@@ -78,9 +82,11 @@ var instancesCmd = cli.Command{
 
 		data, err := xml.MarshalIndent(output, "", "  ")
 		if err != nil {
-			log.Fatalf("Error rendering output: %s", err)
+			log.Printf("Error rendering output: %s\n", err)
+			return err
 		}
 
 		log.Println(string(data))
+		return nil
 	},
 }

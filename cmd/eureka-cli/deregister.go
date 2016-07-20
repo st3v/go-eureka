@@ -17,16 +17,18 @@ var deregisterCmd = cli.Command{
 		endpointsFlag,
 	},
 
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		instance := getInstance(c, "deregister")
 		endpoints := getEndpoints(c, "deregister")
 
 		log.Printf("Deregistering instance '%s' for application '%s'... \n", instance.Id, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.Deregister(instance); err != nil {
-			log.Fatalf("Error deregistering instance with Eureka: %s", err)
+			log.Printf("Error deregistering instance with Eureka: %s\n", err)
+			return err
 		}
 
 		log.Println("Success")
+		return nil
 	},
 }

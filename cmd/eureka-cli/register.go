@@ -17,16 +17,18 @@ var registerCmd = cli.Command{
 		endpointsFlag,
 	},
 
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		instance := getInstance(c, "register")
 		endpoints := getEndpoints(c, "register")
 
 		log.Printf("Registering instance '%s' for application '%s'... \n", instance.Id, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.Register(instance); err != nil {
-			log.Fatalf("Error registering instance with Eureka: %s", err)
+			log.Printf("Error registering instance with Eureka: %s\n", err)
+			return err
 		}
 
 		log.Println("Success")
+		return nil
 	},
 }
