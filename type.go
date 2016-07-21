@@ -25,6 +25,13 @@ type Instance struct {
 	Metadata       Metadata   `xml:"metadata"`
 }
 
+func (i *Instance) Key() string {
+	if i.Id != "" {
+		return i.Id
+	}
+	return i.HostName
+}
+
 type Port uint16
 
 type Status uint8

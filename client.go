@@ -65,11 +65,11 @@ func (c *Client) Register(instance *Instance) error {
 }
 
 func (c *Client) Deregister(instance *Instance) error {
-	return c.do("DELETE", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
+	return c.do("DELETE", c.appInstanceURI(instance.AppName, instance.Key()), nil, http.StatusOK)
 }
 
 func (c *Client) Heartbeat(instance *Instance) error {
-	return c.do("PUT", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
+	return c.do("PUT", c.appInstanceURI(instance.AppName, instance.Key()), nil, http.StatusOK)
 }
 
 func (c *Client) Apps() ([]*App, error) {
@@ -87,24 +87,24 @@ func (c *Client) App(appName string) (*App, error) {
 	return app, err
 }
 
-func (c *Client) AppInstance(appName, instanceId string) (*Instance, error) {
+func (c *Client) AppInstance(appName, instanceKey string) (*Instance, error) {
 	instance := new(Instance)
-	err := c.get(c.appInstanceURI(appName, instanceId), instance)
+	err := c.get(c.appInstanceURI(appName, instanceKey), instance)
 	return instance, err
 }
 
-func (c *Client) Instance(instanceId string) (*Instance, error) {
+func (c *Client) Instance(instanceKey string) (*Instance, error) {
 	instance := new(Instance)
-	err := c.get(c.instanceURI(instanceId), instance)
+	err := c.get(c.instanceURI(instanceKey), instance)
 	return instance, err
 }
 
 func (c *Client) StatusOverride(instance *Instance, status Status) error {
-	return c.do("PUT", c.appInstanceStatusURI(instance.AppName, instance.Id, status), nil, http.StatusOK)
+	return c.do("PUT", c.appInstanceStatusURI(instance.AppName, instance.Key(), status), nil, http.StatusOK)
 }
 
 func (c *Client) RemoveStatusOverride(instance *Instance, fallback Status) error {
-	return c.do("DELETE", c.appInstanceStatusURI(instance.AppName, instance.Id, fallback), nil, http.StatusOK)
+	return c.do("DELETE", c.appInstanceStatusURI(instance.AppName, instance.Key(), fallback), nil, http.StatusOK)
 }
 
 func (c *Client) do(method, uri string, body []byte, respCode int) error {
@@ -165,14 +165,14 @@ func (c *Client) appURI(appName string) string {
 	return fmt.Sprintf("%s/%s", c.appsURI(), appName)
 }
 
-func (c *Client) appInstanceURI(appName, instanceId string) string {
-	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceId)
+func (c *Client) appInstanceURI(appName, instanceKey string) string {
+	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceKey)
 }
 
-func (c *Client) instanceURI(instanceId string) string {
-	return fmt.Sprintf("%s/instances/%s", c.endpoint(), instanceId)
+func (c *Client) instanceURI(instanceKey string) string {
+	return fmt.Sprintf("%s/instances/%s", c.endpoint(), instanceKey)
 }
 
-func (c *Client) appInstanceStatusURI(appName, instanceId string, status Status) string {
-	return fmt.Sprintf("%s/status?value=%s", c.appInstanceURI(appName, instanceId), status)
+func (c *Client) appInstanceStatusURI(appName, instanceKey string, status Status) string {
+	return fmt.Sprintf("%s/status?value=%s", c.appInstanceURI(appName, instanceKey), status)
 }
