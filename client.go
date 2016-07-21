@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -27,10 +28,24 @@ func HttpClient(c *http.Client) Option {
 	}
 }
 
+var defaultHttpClient = &http.Client{
+	Timeout: 10 * time.Second,
+	Transport: &http.Transport{
+		Dial: (&net.Dialer{
+			Timeout:   5 * time.Second,
+			KeepAlive: 60 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ResponseHeaderTimeout: 5 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConnsPerHost:   1,
+	},
+}
+
 func NewClient(endpoints []string, options ...Option) *Client {
 	c := &Client{
 		endpoints:  endpoints,
-		httpClient: http.DefaultClient,
+		httpClient: defaultHttpClient,
 	}
 
 	for _, opt := range options {
