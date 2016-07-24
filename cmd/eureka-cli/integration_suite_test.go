@@ -13,13 +13,16 @@ import (
 	"testing"
 
 	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	"github.com/pborman/uuid"
+
 	"github.com/st3v/go-eureka"
 )
 
 func TestCLI(t *testing.T) {
+	config.DefaultReporterConfig.SlowSpecThreshold = 300.0
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Integration")
 }

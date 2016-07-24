@@ -4,20 +4,20 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"math/rand"
 	"net"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/st3v/go-eureka/retry"
 )
 
-func init() {
-	rand.Seed(time.Now().Unix())
-}
-
 type Client struct {
-	endpoints  []string
-	httpClient *http.Client
+	endpoints     []string
+	httpClient    *http.Client
+	retrySelector retry.Selector
+	retryAllow    retry.Allow
+	retryDelay    retry.Delay
 }
 
 var defaultHttpClient = &http.Client{
@@ -35,9 +35,16 @@ var defaultHttpClient = &http.Client{
 }
 
 func NewClient(endpoints []string, options ...Option) *Client {
+	for i, e := range endpoints {
+		endpoints[i] = strings.TrimRight(e, " /")
+	}
+
 	c := &Client{
-		endpoints:  endpoints,
-		httpClient: defaultHttpClient,
+		endpoints:     endpoints,
+		httpClient:    defaultHttpClient,
+		retrySelector: retry.RoundRobin,
+		retryAllow:    retry.Limit(3),
+		retryDelay:    retry.Linear(1 * time.Second),
 	}
 
 	for _, opt := range options {
@@ -53,20 +60,20 @@ func (c *Client) Register(instance *Instance) error {
 		return err
 	}
 
-	return c.do("POST", c.appURI(instance.AppName), data, http.StatusNoContent)
+	return c.retry(c.do("POST", c.appPath(instance.AppName), data, http.StatusNoContent))
 }
 
 func (c *Client) Deregister(instance *Instance) error {
-	return c.do("DELETE", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
+	return c.retry(c.do("DELETE", c.appInstancePath(instance.AppName, instance.Id), nil, http.StatusOK))
 }
 
 func (c *Client) Heartbeat(instance *Instance) error {
-	return c.do("PUT", c.appInstanceURI(instance.AppName, instance.Id), nil, http.StatusOK)
+	return c.retry(c.do("PUT", c.appInstancePath(instance.AppName, instance.Id), nil, http.StatusOK))
 }
 
 func (c *Client) Apps() ([]*App, error) {
 	result := new(Registry)
-	if err := c.get(c.appsURI(), result); err != nil {
+	if err := c.retry(c.get(c.appsPath(), result)); err != nil {
 		return nil, err
 	}
 
@@ -75,96 +82,104 @@ func (c *Client) Apps() ([]*App, error) {
 
 func (c *Client) App(appName string) (*App, error) {
 	app := new(App)
-	err := c.get(c.appURI(appName), app)
+	err := c.retry(c.get(c.appPath(appName), app))
 	return app, err
 }
 
 func (c *Client) AppInstance(appName, instanceId string) (*Instance, error) {
 	instance := new(Instance)
-	err := c.get(c.appInstanceURI(appName, instanceId), instance)
+	err := c.retry(c.get(c.appInstancePath(appName, instanceId), instance))
 	return instance, err
 }
 
 func (c *Client) Instance(instanceId string) (*Instance, error) {
 	instance := new(Instance)
-	err := c.get(c.instanceURI(instanceId), instance)
+	err := c.retry(c.get(c.instancePath(instanceId), instance))
 	return instance, err
 }
 
 func (c *Client) StatusOverride(instance *Instance, status Status) error {
-	return c.do("PUT", c.appInstanceStatusURI(instance.AppName, instance.Id, status), nil, http.StatusOK)
+	return c.retry(c.do("PUT", c.appInstanceStatusPath(instance.AppName, instance.Id, status), nil, http.StatusOK))
 }
 
 func (c *Client) RemoveStatusOverride(instance *Instance, fallback Status) error {
-	return c.do("DELETE", c.appInstanceStatusURI(instance.AppName, instance.Id, fallback), nil, http.StatusOK)
+	return c.retry(c.do("DELETE", c.appInstanceStatusPath(instance.AppName, instance.Id, fallback), nil, http.StatusOK))
 }
 
-func (c *Client) do(method, uri string, body []byte, respCode int) error {
-	req, err := http.NewRequest(method, uri, bytes.NewBuffer(body))
-	if err != nil {
-		return err
+func (c *Client) retry(action retry.Action) error {
+	return retry.NewStrategy(
+		c.retrySelector(c.endpoints),
+		c.retryAllow,
+		c.retryDelay,
+	).Apply(action)
+}
+
+func (c *Client) do(method, path string, body []byte, respCode int) retry.Action {
+	return func(endpoint string) error {
+		req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", endpoint, path), bytes.NewBuffer(body))
+		if err != nil {
+			return err
+		}
+
+		req.Header.Add("Content-Type", "application/xml")
+		req.Header.Add("Accept", "application/xml")
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != respCode {
+			return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
+		}
+
+		return nil
 	}
+}
 
-	req.Header.Add("Content-Type", "application/xml")
-	req.Header.Add("Accept", "application/xml")
+func (c *Client) get(path string, result interface{}) retry.Action {
+	return func(endpoint string) error {
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", endpoint, path), nil)
+		if err != nil {
+			return err
+		}
 
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
+		req.Header.Add("Accept", "application/xml")
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
+		}
+
+		defer resp.Body.Close()
+		if err := xml.NewDecoder(resp.Body).Decode(result); err != nil {
+			return err
+		}
+
+		return nil
 	}
-
-	if resp.StatusCode != respCode {
-		return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
-	}
-
-	return nil
 }
 
-func (c *Client) get(uri string, result interface{}) error {
-	req, err := http.NewRequest("GET", uri, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Accept", "application/xml")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected response code %d", resp.StatusCode)
-	}
-
-	defer resp.Body.Close()
-	if err := xml.NewDecoder(resp.Body).Decode(result); err != nil {
-		return err
-	}
-
-	return nil
+func (c *Client) appsPath() string {
+	return "apps"
 }
 
-func (c *Client) endpoint() string {
-	return strings.TrimRight(c.endpoints[rand.Intn(len(c.endpoints))], " /")
+func (c *Client) appPath(appName string) string {
+	return fmt.Sprintf("%s/%s", c.appsPath(), appName)
 }
 
-func (c *Client) appsURI() string {
-	return fmt.Sprintf("%s/apps", c.endpoint())
+func (c *Client) appInstancePath(appName, instanceId string) string {
+	return fmt.Sprintf("%s/%s", c.appPath(appName), instanceId)
 }
 
-func (c *Client) appURI(appName string) string {
-	return fmt.Sprintf("%s/%s", c.appsURI(), appName)
+func (c *Client) instancePath(instanceId string) string {
+	return fmt.Sprintf("instances/%s", instanceId)
 }
 
-func (c *Client) appInstanceURI(appName, instanceId string) string {
-	return fmt.Sprintf("%s/%s", c.appURI(appName), instanceId)
-}
-
-func (c *Client) instanceURI(instanceId string) string {
-	return fmt.Sprintf("%s/instances/%s", c.endpoint(), instanceId)
-}
-
-func (c *Client) appInstanceStatusURI(appName, instanceId string, status Status) string {
-	return fmt.Sprintf("%s/status?value=%s", c.appInstanceURI(appName, instanceId), status)
+func (c *Client) appInstanceStatusPath(appName, instanceId string, status Status) string {
+	return fmt.Sprintf("%s/status?value=%s", c.appInstancePath(appName, instanceId), status)
 }
