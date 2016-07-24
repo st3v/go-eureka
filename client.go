@@ -15,17 +15,9 @@ func init() {
 	rand.Seed(time.Now().Unix())
 }
 
-type Option func(*Client)
-
 type Client struct {
 	endpoints  []string
 	httpClient *http.Client
-}
-
-func HttpClient(c *http.Client) Option {
-	return func(client *Client) {
-		client.httpClient = c
-	}
 }
 
 var defaultHttpClient = &http.Client{

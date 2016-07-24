@@ -14,7 +14,7 @@ import (
 	"github.com/st3v/go-eureka"
 )
 
-var _ = Describe("eureka", func() {
+var _ = Describe("client", func() {
 	var (
 		server     *ghttp.Server
 		client     *eureka.Client
