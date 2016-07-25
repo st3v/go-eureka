@@ -40,13 +40,15 @@ var _ = Describe("retry", func() {
 			})
 
 			It("retries until it succeeds", func() {
-				strategy := retry.NewStrategy(
-					retry.RoundRobin([]string{"one"}),
-					retry.NoLimit(),
-					retry.NoDelay(),
-				)
+				var (
+					strategy = retry.NewStrategy(
+						retry.RoundRobin([]string{"one"}),
+						retry.MaxRetries(numErr+2),
+						retry.NoDelay(),
+					)
 
-				err := strategy.Apply(action)
+					err = strategy.Apply(action)
+				)
 
 				Expect(err).ToNot(HaveOccurred())
 				Expect(retries).To(Equal(numErr + 1))
@@ -57,7 +59,7 @@ var _ = Describe("retry", func() {
 					limit    = numErr - 1
 					strategy = retry.NewStrategy(
 						retry.RoundRobin([]string{"one"}),
-						retry.Limit(limit),
+						retry.MaxRetries(limit),
 						retry.NoDelay(),
 					)
 
@@ -112,7 +114,7 @@ var _ = Describe("retry", func() {
 
 		Describe(".RoundRobin", func() {
 			It("returns the expected series of endpoint", func() {
-				endpoint := retry.RoundRobin(endpoints)
+				var endpoint = retry.RoundRobin(endpoints)
 
 				for i := 0; i < 100; i++ {
 					Expect(endpoint(uint(i))).To(Equal(endpoints[i%len(endpoints)]))
@@ -141,20 +143,23 @@ var _ = Describe("retry", func() {
 	})
 
 	Describe(".Allow", func() {
-		Describe(".NoLimit", func() {
-			It("always returns true", func() {
-				allow := retry.NoLimit()
-				for i := uint(0); i < 1000; i++ {
-					Expect(allow(i)).To(BeTrue())
+		Describe(".NoRetries", func() {
+			It("always returns false except for the first attempt", func() {
+				var allow = retry.NoRetries()
+
+				Expect(allow(uint(0))).To(BeTrue())
+
+				for i := 1; i < 100; i++ {
+					Expect(allow(uint(i))).To(BeFalse())
 				}
 			})
 		})
 
-		Describe(".Limit", func() {
+		Describe(".MaxRetries", func() {
 			It("returns the expected bool", func() {
 				var (
 					limit = 100
-					allow = retry.Limit(limit)
+					allow = retry.MaxRetries(limit)
 				)
 
 				for i := 0; i < limit; i++ {
@@ -171,31 +176,34 @@ var _ = Describe("retry", func() {
 	Describe(".Delay", func() {
 		Describe(".NoDelay", func() {
 			It("always returns 0", func() {
-				delay := retry.NoDelay()
+				var delay = retry.NoDelay()
+
 				for i := uint(0); i < 100; i++ {
 					Expect(delay(i)).To(Equal(time.Duration(0)))
 				}
 			})
 		})
 
-		Describe(".Constant", func() {
-			It("always returns the specified delay", func() {
+		Describe(".ConstantDelay", func() {
+			It("returns the specified delay for any attempt except the first", func() {
 				var (
 					term  = 123 * time.Second
-					delay = retry.Constant(term)
+					delay = retry.ConstantDelay(term)
 				)
 
-				for i := uint(0); i < 10; i++ {
+				Expect(delay(uint(0))).To(Equal(time.Duration(0)))
+
+				for i := uint(1); i < 10; i++ {
 					Expect(delay(i)).To(Equal(term))
 				}
 			})
 		})
 
-		Describe(".Linear", func() {
+		Describe(".LinearBackoff", func() {
 			It("returns the expected series of delays", func() {
 				var (
 					term  = 123 * time.Second
-					delay = retry.Linear(term)
+					delay = retry.LinearBackoff(term)
 				)
 
 				for i := uint(0); i < 10; i++ {
@@ -204,11 +212,11 @@ var _ = Describe("retry", func() {
 			})
 		})
 
-		Describe(".Exponential", func() {
+		Describe(".ExponentialBackoff", func() {
 			It("returns the expected series of delays", func() {
 				var (
 					term  = 123 * time.Second
-					delay = retry.Exponential(term)
+					delay = retry.ExponentialBackoff(term)
 				)
 
 				for i := uint(0); i < 10; i++ {

@@ -48,35 +48,38 @@ func Random(endpoints []string) Endpoint {
 	}
 }
 
-func NoLimit() Allow {
+func NoRetries() Allow {
 	return func(attempt uint) bool {
-		return true
+		return attempt == 0
 	}
 }
 
-func Limit(max int) Allow {
+func MaxRetries(max int) Allow {
 	return func(attempt uint) bool {
 		return attempt < uint(max)
 	}
 }
 
 func NoDelay() Delay {
-	return Constant(0)
+	return ConstantDelay(0)
 }
 
-func Constant(delay time.Duration) Delay {
+func ConstantDelay(delay time.Duration) Delay {
 	return func(attempt uint) time.Duration {
+		if attempt == 0 {
+			return 0
+		}
 		return delay
 	}
 }
 
-func Linear(delay time.Duration) Delay {
+func LinearBackoff(delay time.Duration) Delay {
 	return func(attempt uint) time.Duration {
 		return time.Duration(attempt) * delay
 	}
 }
 
-func Exponential(delay time.Duration) Delay {
+func ExponentialBackoff(delay time.Duration) Delay {
 	return func(attempt uint) time.Duration {
 		return time.Duration(math.Pow(2.0, float64(attempt))) * delay
 	}

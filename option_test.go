@@ -15,7 +15,22 @@ var _ = Describe("client options", func() {
 	Describe("No option", func() {
 		It("uses the default http client", func() {
 			client := NewClient([]string{"endpoint"})
-			Expect(client.httpClient).To(Equal(defaultHttpClient))
+			Expect(client.httpClient).To(Equal(DefaultHttpClient))
+		})
+
+		It("uses the default retry selector", func() {
+			client := NewClient([]string{"endpoint"})
+			Expect(reflect.ValueOf(client.retrySelector)).To(Equal(reflect.ValueOf(DefaultRetrySelector)))
+		})
+
+		It("uses the default retry limit", func() {
+			client := NewClient([]string{"endpoint"})
+			Expect(reflect.ValueOf(client.retryLimit)).To(Equal(reflect.ValueOf(DefaultRetryLimit)))
+		})
+
+		It("uses the default retry delay", func() {
+			client := NewClient([]string{"endpoint"})
+			Expect(reflect.ValueOf(client.retryDelay)).To(Equal(reflect.ValueOf(DefaultRetryDelay)))
 		})
 	})
 
@@ -27,18 +42,31 @@ var _ = Describe("client options", func() {
 		})
 	})
 
-	Describe("Retry", func() {
-		var (
-			selector retry.Selector = func(_ []string) retry.Endpoint { return func(_ uint) string { return "" } }
-			allow    retry.Allow    = func(_ uint) bool { return true }
-			delay    retry.Delay    = func(_ uint) time.Duration { return 0 }
-
-			client = NewClient([]string{"endpoint"}, Retry(selector, allow, delay))
-		)
+	Describe("RetrySelector", func() {
+		var selector retry.Selector = func(_ []string) retry.Endpoint {
+			return func(_ uint) string { return "" }
+		}
 
 		It("sets retry selector", func() {
+			client := NewClient([]string{"endpoint"}, RetrySelector(selector))
 			Expect(reflect.ValueOf(client.retrySelector)).To(Equal(reflect.ValueOf(selector)))
-			Expect(reflect.ValueOf(client.retryAllow)).To(Equal(reflect.ValueOf(allow)))
+		})
+	})
+
+	Describe("RetryLimit", func() {
+		var allow retry.Allow = func(_ uint) bool { return true }
+
+		It("sets retry limit", func() {
+			client := NewClient([]string{"endpoint"}, RetryLimit(allow))
+			Expect(reflect.ValueOf(client.retryLimit)).To(Equal(reflect.ValueOf(allow)))
+		})
+	})
+
+	Describe("RetryDelay", func() {
+		var delay retry.Delay = func(_ uint) time.Duration { return 0 }
+
+		It("sets retry delay", func() {
+			client := NewClient([]string{"endpoint"}, RetryDelay(delay))
 			Expect(reflect.ValueOf(client.retryDelay)).To(Equal(reflect.ValueOf(delay)))
 		})
 	})

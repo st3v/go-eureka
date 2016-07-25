@@ -29,11 +29,8 @@ var _ = Describe("client", func() {
 		server = ghttp.NewServer()
 		client = eureka.NewClient(
 			[]string{server.URL()},
-			eureka.Retry(
-				retry.RoundRobin,
-				retry.Limit(numRetries),
-				retry.NoDelay(),
-			),
+			eureka.RetryLimit(retry.MaxRetries(numRetries)),
+			eureka.RetryDelay(retry.NoDelay()),
 		)
 
 		var err error

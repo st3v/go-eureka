@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"net"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/st3v/go-eureka/retry"
 )
@@ -16,22 +14,8 @@ type Client struct {
 	endpoints     []string
 	httpClient    *http.Client
 	retrySelector retry.Selector
-	retryAllow    retry.Allow
+	retryLimit    retry.Allow
 	retryDelay    retry.Delay
-}
-
-var defaultHttpClient = &http.Client{
-	Timeout: 10 * time.Second,
-	Transport: &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout:   5 * time.Second,
-			KeepAlive: 60 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout:   5 * time.Second,
-		ResponseHeaderTimeout: 5 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   1,
-	},
 }
 
 func NewClient(endpoints []string, options ...Option) *Client {
@@ -41,10 +25,10 @@ func NewClient(endpoints []string, options ...Option) *Client {
 
 	c := &Client{
 		endpoints:     endpoints,
-		httpClient:    defaultHttpClient,
-		retrySelector: retry.RoundRobin,
-		retryAllow:    retry.Limit(3),
-		retryDelay:    retry.Linear(1 * time.Second),
+		httpClient:    DefaultHttpClient,
+		retrySelector: DefaultRetrySelector,
+		retryLimit:    DefaultRetryLimit,
+		retryDelay:    DefaultRetryDelay,
 	}
 
 	for _, opt := range options {
@@ -107,11 +91,7 @@ func (c *Client) RemoveStatusOverride(instance *Instance, fallback Status) error
 }
 
 func (c *Client) retry(action retry.Action) error {
-	return retry.NewStrategy(
-		c.retrySelector(c.endpoints),
-		c.retryAllow,
-		c.retryDelay,
-	).Apply(action)
+	return retry.NewStrategy(c.retrySelector(c.endpoints), c.retryLimit, c.retryDelay).Apply(action)
 }
 
 func (c *Client) do(method, path string, body []byte, respCode int) retry.Action {
