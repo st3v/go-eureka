@@ -179,7 +179,7 @@ var _ = Describe("client", func() {
 			app, err = appFixture()
 			Expect(err).ToNot(HaveOccurred())
 
-			response := eureka.Registry{
+			response := eureka.AppsResponse{
 				Apps: []*eureka.App{app, app},
 			}
 
@@ -404,7 +404,7 @@ var _ = Describe("client", func() {
 			app, err = appFixture()
 			Expect(err).ToNot(HaveOccurred())
 
-			response := eureka.Registry{
+			response := eureka.AppsResponse{
 				Apps: []*eureka.App{app},
 			}
 

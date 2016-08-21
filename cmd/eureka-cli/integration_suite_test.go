@@ -128,7 +128,7 @@ func assertRegistration(instance *eureka.Instance) func() error {
 			return fmt.Errorf("Unexpected Status Code: %d", resp.StatusCode)
 		}
 
-		result := new(eureka.Registry)
+		result := new(eureka.AppsResponse)
 
 		err = xml.NewDecoder(resp.Body).Decode(result)
 		if err != nil {

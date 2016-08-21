@@ -108,7 +108,7 @@ func (r *registry) list(req *restful.Request, resp *restful.Response) {
 		apps = append(apps, app)
 	}
 
-	result := eureka.Registry{
+	result := eureka.AppsResponse{
 		Apps: apps,
 	}
 

@@ -63,7 +63,7 @@ func (c *Client) Watch(pollInterval time.Duration) *Watcher {
 }
 
 func (c *Client) Apps() ([]*App, error) {
-	result := new(Registry)
+	result := new(AppsResponse)
 	if err := c.retry(c.get(c.appsPath(), result)); err != nil {
 		return nil, err
 	}

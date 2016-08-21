@@ -42,12 +42,12 @@ type Watcher struct {
 	cancel    context.CancelFunc
 }
 
-// AppsProvider can be used to poll for registered Apps.
-type AppsProvider interface {
+// Registry is being used to poll for registered Apps.
+type Registry interface {
 	Apps() ([]*App, error)
 }
 
-func newWatcher(registry AppsProvider, pollInterval time.Duration) *Watcher {
+func newWatcher(registry Registry, pollInterval time.Duration) *Watcher {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	watcher := &Watcher{
@@ -71,7 +71,7 @@ func (w *Watcher) Events() <-chan Event {
 	return w.events
 }
 
-func (w *Watcher) poll(ctx context.Context, registry AppsProvider, interval time.Duration) {
+func (w *Watcher) poll(ctx context.Context, registry Registry, interval time.Duration) {
 	tick := time.NewTicker(interval)
 	defer tick.Stop()
 

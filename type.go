@@ -118,7 +118,7 @@ type App struct {
 	Instances []*Instance `xml:"instance"`
 }
 
-type Registry struct {
+type AppsResponse struct {
 	XMLName      xml.Name `xml:"applications"`
 	VersionDelta int      `xml:"versions__delta"`
 	Hashcode     string   `xml:"apps__hashcode"`
