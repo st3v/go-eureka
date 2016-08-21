@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -53,7 +52,7 @@ type instancesResult struct {
 
 func (r *instancesResult) Contains(that *eureka.Instance) bool {
 	for _, this := range r.Instances {
-		if instancesEqual(this, that) {
+		if this.Equals(that) {
 			return true
 		}
 	}
@@ -107,19 +106,6 @@ func endpointFlags() []string {
 	return flags
 }
 
-func instancesEqual(one, two *eureka.Instance) bool {
-	return one.ID == two.ID &&
-		strings.ToLower(one.AppName) == strings.ToLower(two.AppName) &&
-		one.HostName == two.HostName &&
-		one.IpAddr == two.IpAddr &&
-		one.VipAddr == two.VipAddr &&
-		one.Port == two.Port &&
-		one.SecurePort == two.SecurePort &&
-		one.Status == two.Status &&
-		reflect.DeepEqual(one.Metadata, two.Metadata) &&
-		reflect.DeepEqual(one.DataCenterInfo, two.DataCenterInfo)
-}
-
 func assertRegistration(instance *eureka.Instance) func() error {
 	return func() error {
 		endpoint := endpoints()[0]
@@ -155,7 +141,7 @@ func assertRegistration(instance *eureka.Instance) func() error {
 			}
 
 			for _, i := range app.Instances {
-				if instancesEqual(i, instance) {
+				if i.Equals(instance) {
 					return nil
 				}
 			}

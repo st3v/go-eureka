@@ -2,6 +2,7 @@ package eureka
 
 import (
 	"encoding/xml"
+	"strings"
 	"time"
 )
 
@@ -23,6 +24,25 @@ type Instance struct {
 	DataCenterInfo DataCenter `xml:"dataCenterInfo"`
 	LeaseInfo      Lease      `xml:"leaseInfo"`
 	Metadata       Metadata   `xml:"metadata"`
+}
+
+// Equals checks if two instances are the same. Does not compare LeaseInfo.
+func (i *Instance) Equals(other *Instance) bool {
+	return i.ID == other.ID &&
+		i.HostName == other.HostName &&
+		strings.ToUpper(i.AppName) == strings.ToUpper(other.AppName) &&
+		i.IpAddr == other.IpAddr &&
+		i.VipAddr == other.VipAddr &&
+		i.SecureVipAddr == other.SecureVipAddr &&
+		i.Status == other.Status &&
+		i.StatusOverride == other.StatusOverride &&
+		i.Port == other.Port &&
+		i.SecurePort == other.SecurePort &&
+		i.HomePageUrl == other.HomePageUrl &&
+		i.StatusPageUrl == other.StatusPageUrl &&
+		i.HealthCheckUrl == other.HealthCheckUrl &&
+		i.DataCenterInfo == other.DataCenterInfo &&
+		i.Metadata.Equals(other.Metadata)
 }
 
 type Port uint16
@@ -77,6 +97,20 @@ type Duration time.Duration
 type Time time.Time
 
 type Metadata map[string]string
+
+func (m Metadata) Equals(other Metadata) bool {
+	if len(m) != len(other) {
+		return false
+	}
+
+	for k, v := range m {
+		if v != other[k] {
+			return false
+		}
+	}
+
+	return true
+}
 
 type App struct {
 	XMLName   xml.Name    `xml:"application"`
