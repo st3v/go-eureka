@@ -11,16 +11,16 @@ type Instance struct {
 	ID             string     `xml:"instanceId"`
 	HostName       string     `xml:"hostName"`
 	AppName        string     `xml:"app"`
-	IpAddr         string     `xml:"ipAddr"`
-	VipAddr        string     `xml:"vipAddress"`
-	SecureVipAddr  string     `xml:"secureVipAddress"`
+	IPAddr         string     `xml:"ipAddr"`
+	VIPAddr        string     `xml:"vipAddress"`
+	SecureVIPAddr  string     `xml:"secureVipAddress"`
 	Status         Status     `xml:"status"`
 	StatusOverride Status     `xml:"overriddenstatus"`
 	Port           Port       `xml:"port"`
 	SecurePort     Port       `xml:"securePort"`
-	HomePageUrl    string     `xml:"homePageUrl"`
-	StatusPageUrl  string     `xml:"statusPageUrl"`
-	HealthCheckUrl string     `xml:"healthCheckUrl"`
+	HomePageURL    string     `xml:"homePageUrl"`
+	StatusPageURL  string     `xml:"statusPageUrl"`
+	HealthCheckURL string     `xml:"healthCheckUrl"`
 	DataCenterInfo DataCenter `xml:"dataCenterInfo"`
 	LeaseInfo      Lease      `xml:"leaseInfo"`
 	Metadata       Metadata   `xml:"metadata"`
@@ -31,16 +31,16 @@ func (i *Instance) Equals(other *Instance) bool {
 	return i.ID == other.ID &&
 		i.HostName == other.HostName &&
 		strings.ToUpper(i.AppName) == strings.ToUpper(other.AppName) &&
-		i.IpAddr == other.IpAddr &&
-		i.VipAddr == other.VipAddr &&
-		i.SecureVipAddr == other.SecureVipAddr &&
+		i.IPAddr == other.IPAddr &&
+		i.VIPAddr == other.VIPAddr &&
+		i.SecureVIPAddr == other.SecureVIPAddr &&
 		i.Status == other.Status &&
 		i.StatusOverride == other.StatusOverride &&
 		i.Port == other.Port &&
 		i.SecurePort == other.SecurePort &&
-		i.HomePageUrl == other.HomePageUrl &&
-		i.StatusPageUrl == other.StatusPageUrl &&
-		i.HealthCheckUrl == other.HealthCheckUrl &&
+		i.HomePageURL == other.HomePageURL &&
+		i.StatusPageURL == other.StatusPageURL &&
+		i.HealthCheckURL == other.HealthCheckURL &&
 		i.DataCenterInfo == other.DataCenterInfo &&
 		i.Metadata.Equals(other.Metadata)
 }
@@ -70,11 +70,11 @@ const (
 )
 
 type AmazonMetadata struct {
-	Hostname         string `xml:"hostname'`
+	HostName         string `xml:"hostname"`
 	PublicHostName   string `xml:"public-hostname"`
 	LocalHostName    string `xml:"local-hostname"`
-	PublicIpv4       string `xml:"public-ipv4'`
-	LocalIpv4        string `xml:"local-ipv4"`
+	PublicIPV4       string `xml:"public-ipv4"`
+	LocalIPV4        string `xml:"local-ipv4"`
 	AvailabilityZone string `xml:"availability-zone"`
 	InstanceID       string `xml:"instance-id"`
 	InstanceType     string `xml:"instance-type"`

@@ -15,10 +15,10 @@
     <dataCenterInfo>
         <name>MyOwn</name>
         <metadata>
-            <Hostname>dchost</Hostname>
+            <hostname>dchost</hostname>
             <public-hostname>dc.public.host</public-hostname>
             <local-hostname>dc.local.host</local-hostname>
-            <PublicIpv4>1.2.3.5</PublicIpv4>
+            <public-ipv4>1.2.3.5</public-ipv4>
             <local-ipv4>1.2.3.6</local-ipv4>
             <availability-zone>az</availability-zone>
             <instance-id>instance.id</instance-id>
