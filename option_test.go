@@ -15,7 +15,7 @@ var _ = Describe("client options", func() {
 	Describe("No option", func() {
 		It("uses the default http client", func() {
 			client := NewClient([]string{"endpoint"})
-			Expect(client.httpClient).To(Equal(DefaultHttpClient))
+			Expect(client.httpClient).To(Equal(DefaultHTTPClient))
 		})
 
 		It("uses the default retry selector", func() {
@@ -34,10 +34,10 @@ var _ = Describe("client options", func() {
 		})
 	})
 
-	Describe("HttpClient", func() {
-		It("switches the specified http client", func() {
+	Describe("HTTPClient", func() {
+		It("switches to the specified http client", func() {
 			hc := &http.Client{}
-			client := NewClient([]string{"endpoint"}, HttpClient(hc))
+			client := NewClient([]string{"endpoint"}, HTTPClient(hc))
 			Expect(client.httpClient).To(Equal(hc))
 		})
 	})

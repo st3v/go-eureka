@@ -34,7 +34,7 @@ func main() {
 	flag.Parse()
 
 	addr := fmt.Sprintf("%s:%d", host, port)
-	server := fake.NewRegistry().HttpServer(addr, debug)
+	server := fake.NewRegistry().HTTPServer(addr, debug)
 
 	log.Println(warning)
 

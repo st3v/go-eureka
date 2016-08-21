@@ -25,7 +25,7 @@ func NewClient(endpoints []string, options ...Option) *Client {
 
 	c := &Client{
 		endpoints:     endpoints,
-		httpClient:    DefaultHttpClient,
+		httpClient:    DefaultHTTPClient,
 		retrySelector: DefaultRetrySelector,
 		retryLimit:    DefaultRetryLimit,
 		retryDelay:    DefaultRetryDelay,

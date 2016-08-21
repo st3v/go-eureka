@@ -20,7 +20,7 @@ func NewRegistry() *registry {
 	}
 }
 
-func (r *registry) HttpServer(addr string, debug bool) *http.Server {
+func (r *registry) HTTPServer(addr string, debug bool) *http.Server {
 	if debug {
 		restful.TraceLogger(log.New(os.Stdout, "[restful] ", log.LstdFlags|log.Lshortfile))
 	}

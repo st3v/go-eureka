@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	DefaultHttpClient = &http.Client{
+	DefaultHTTPClient = &http.Client{
 		Timeout: 10 * time.Second,
 		Transport: &http.Transport{
 			Dial: (&net.Dialer{
@@ -30,7 +30,7 @@ var (
 
 type Option func(*Client)
 
-func HttpClient(hc *http.Client) Option {
+func HTTPClient(hc *http.Client) Option {
 	return func(c *Client) {
 		c.httpClient = hc
 	}
