@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -392,6 +393,49 @@ var _ = Describe("client", func() {
 				_, err := client.Instance(instance.ID)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
+		})
+	})
+
+	Describe(".Watch", func() {
+		var app *eureka.App
+
+		BeforeEach(func() {
+			var err error
+			app, err = appFixture()
+			Expect(err).ToNot(HaveOccurred())
+
+			response := eureka.Registry{
+				Apps: []*eureka.App{app},
+			}
+
+			var body []byte
+			body, err = xml.Marshal(response)
+			Expect(err).ToNot(HaveOccurred())
+
+			statusCode = http.StatusOK
+			for i := 0; i < 20; i++ {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/apps"),
+						ghttp.RespondWithPtr(&statusCode, &body),
+					),
+				)
+			}
+		})
+
+		It("returns a functional watcher", func() {
+			// get watcher
+			watcher := client.Watch(10 * time.Millisecond)
+			defer watcher.Stop()
+
+			// expect exactly one registration event
+			expectedEvent := eureka.Event{eureka.EventInstanceRegistered, app.Instances[0]}
+			Eventually(watcher.Events()).Should(Receive(Equal(expectedEvent)))
+
+			// watcher keeps polling
+			Eventually(func() int {
+				return len(server.ReceivedRequests())
+			}).Should(BeNumerically(">", 10))
 		})
 	})
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/st3v/go-eureka/retry"
 )
@@ -53,6 +54,12 @@ func (c *Client) Deregister(instance *Instance) error {
 
 func (c *Client) Heartbeat(instance *Instance) error {
 	return c.retry(c.do("PUT", c.appInstancePath(instance.AppName, instance.ID), nil, http.StatusOK))
+}
+
+// Watch returns a new watcher that keeps polling the registry at the defined
+// interval and reports observed changes on its Events() channel.
+func (c *Client) Watch(pollInterval time.Duration) *Watcher {
+	return newWatcher(c, pollInterval)
 }
 
 func (c *Client) Apps() ([]*App, error) {
