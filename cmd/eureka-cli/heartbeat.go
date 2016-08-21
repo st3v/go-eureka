@@ -21,7 +21,7 @@ var heartbeatCmd = cli.Command{
 		instance := getInstance(c, "heartbeat")
 		endpoints := getEndpoints(c, "heartbeat")
 
-		log.Printf("Sending heartbeat for instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
+		log.Printf("Sending heartbeat for instance '%s' of application '%s'... \n", instance.ID, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.Heartbeat(instance); err != nil {
 			log.Printf("Error sending heartbeat: %s\n", err)

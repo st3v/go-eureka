@@ -73,7 +73,7 @@ func instanceToFile(instance *eureka.Instance) string {
 
 func testInstance() *eureka.Instance {
 	return &eureka.Instance{
-		Id:         uuid.New(),
+		ID:         uuid.New(),
 		AppName:    uuid.New(),
 		HostName:   "host-name",
 		IpAddr:     "1.2.3.4",
@@ -108,7 +108,7 @@ func endpointFlags() []string {
 }
 
 func instancesEqual(one, two *eureka.Instance) bool {
-	return one.Id == two.Id &&
+	return one.ID == two.ID &&
 		strings.ToLower(one.AppName) == strings.ToLower(two.AppName) &&
 		one.HostName == two.HostName &&
 		one.IpAddr == two.IpAddr &&

@@ -21,7 +21,7 @@ var registerCmd = cli.Command{
 		instance := getInstance(c, "register")
 		endpoints := getEndpoints(c, "register")
 
-		log.Printf("Registering instance '%s' for application '%s'... \n", instance.Id, instance.AppName)
+		log.Printf("Registering instance '%s' for application '%s'... \n", instance.ID, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.Register(instance); err != nil {
 			log.Printf("Error registering instance with Eureka: %s\n", err)

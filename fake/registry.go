@@ -48,11 +48,11 @@ func (r *registry) deregister(req *restful.Request, resp *restful.Response) {
 	resp.AddHeader("Content-Type", "text/plain")
 
 	name := req.PathParameter("app-name")
-	instanceId := req.PathParameter("instance-id")
+	instanceID := req.PathParameter("instance-id")
 
 	if app, found := r.apps[name]; found {
 		for i, instance := range app.Instances {
-			if instance.Id == instanceId {
+			if instance.ID == instanceID {
 				app.Instances = append(app.Instances[0:i], app.Instances[i+1:]...)
 
 				if len(app.Instances) == 0 {
@@ -89,7 +89,7 @@ func (r *registry) register(req *restful.Request, resp *restful.Response) {
 	}
 
 	for _, i := range app.Instances {
-		if i.Id == instance.Id {
+		if i.ID == instance.ID {
 			resp.WriteErrorString(http.StatusMethodNotAllowed, "Instance already registered")
 			return
 		}
@@ -132,9 +132,9 @@ func (r *registry) heartbeat(req *restful.Request, resp *restful.Response) {
 	resp.AddHeader("Content-Type", "text/plain")
 
 	name := req.PathParameter("app-name")
-	instanceId := req.PathParameter("instance-id")
+	instanceID := req.PathParameter("instance-id")
 
-	if _, found := r.findAppInstance(name, instanceId); !found {
+	if _, found := r.findAppInstance(name, instanceID); !found {
 		resp.WriteErrorString(http.StatusNotFound, "Instance not found.")
 		return
 	}
@@ -143,9 +143,9 @@ func (r *registry) heartbeat(req *restful.Request, resp *restful.Response) {
 }
 
 func (r *registry) instance(req *restful.Request, resp *restful.Response) {
-	instanceId := req.PathParameter("instance-id")
+	instanceID := req.PathParameter("instance-id")
 
-	if i, found := findInstance(instanceId, r.apps); found {
+	if i, found := findInstance(instanceID, r.apps); found {
 		resp.WriteEntity(i)
 		return
 	}
@@ -156,9 +156,9 @@ func (r *registry) instance(req *restful.Request, resp *restful.Response) {
 
 func (r *registry) appInstance(req *restful.Request, resp *restful.Response) {
 	name := req.PathParameter("app-name")
-	instanceId := req.PathParameter("instance-id")
+	instanceID := req.PathParameter("instance-id")
 
-	if i, found := r.findAppInstance(name, instanceId); found {
+	if i, found := r.findAppInstance(name, instanceID); found {
 		resp.WriteEntity(i)
 		return
 	}
@@ -176,9 +176,9 @@ func (r *registry) statusOverride(req *restful.Request, resp *restful.Response) 
 	}
 
 	name := req.PathParameter("app-name")
-	instanceId := req.PathParameter("instance-id")
+	instanceID := req.PathParameter("instance-id")
 
-	instance, found := r.findAppInstance(name, instanceId)
+	instance, found := r.findAppInstance(name, instanceID)
 	if !found {
 		resp.WriteErrorString(http.StatusNotFound, "Instance not registered")
 		return
@@ -198,9 +198,9 @@ func (r *registry) removeStatusOverride(req *restful.Request, resp *restful.Resp
 	}
 
 	name := req.PathParameter("app-name")
-	instanceId := req.PathParameter("instance-id")
+	instanceID := req.PathParameter("instance-id")
 
-	instance, found := r.findAppInstance(name, instanceId)
+	instance, found := r.findAppInstance(name, instanceID)
 	if !found {
 		resp.WriteErrorString(http.StatusNotFound, "Instance not registered")
 		return
@@ -210,18 +210,18 @@ func (r *registry) removeStatusOverride(req *restful.Request, resp *restful.Resp
 	instance.StatusOverride = eureka.StatusUnknown
 }
 
-func (r *registry) findAppInstance(appName, instanceId string) (*eureka.Instance, bool) {
+func (r *registry) findAppInstance(appName, instanceID string) (*eureka.Instance, bool) {
 	if app, found := r.apps[appName]; found {
-		return findInstance(instanceId, map[string]*eureka.App{app.Name: app})
+		return findInstance(instanceID, map[string]*eureka.App{app.Name: app})
 	}
 
 	return nil, false
 }
 
-func findInstance(instanceId string, apps map[string]*eureka.App) (*eureka.Instance, bool) {
+func findInstance(instanceID string, apps map[string]*eureka.App) (*eureka.Instance, bool) {
 	for _, a := range apps {
 		for _, i := range a.Instances {
-			if i.Id == instanceId {
+			if i.ID == instanceID {
 				return i, true
 			}
 		}

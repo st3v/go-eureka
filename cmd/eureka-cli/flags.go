@@ -16,7 +16,7 @@ var appNameFlag = cli.StringFlag{
 	Usage: "Application Name, required if instance ID has been specified",
 }
 
-var instanceIdFlag = cli.StringFlag{
+var instanceIDFlag = cli.StringFlag{
 	Name:  "instance, i",
 	Value: "",
 	Usage: "Instance ID",

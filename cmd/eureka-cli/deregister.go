@@ -21,7 +21,7 @@ var deregisterCmd = cli.Command{
 		instance := getInstance(c, "deregister")
 		endpoints := getEndpoints(c, "deregister")
 
-		log.Printf("Deregistering instance '%s' for application '%s'... \n", instance.Id, instance.AppName)
+		log.Printf("Deregistering instance '%s' for application '%s'... \n", instance.ID, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.Deregister(instance); err != nil {
 			log.Printf("Error deregistering instance with Eureka: %s\n", err)

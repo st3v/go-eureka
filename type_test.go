@@ -17,7 +17,7 @@ var _ = Describe("Instance", func() {
 		instanceXml []byte
 		instance    = eureka.Instance{
 			XMLName:        xml.Name{Local: "instance"},
-			Id:             "id",
+			ID:             "id",
 			HostName:       "host",
 			AppName:        "myapp",
 			IpAddr:         "1.2.3.4",
@@ -47,9 +47,9 @@ var _ = Describe("Instance", func() {
 					PublicIpv4:       "1.2.3.5",
 					LocalIpv4:        "1.2.3.6",
 					AvailabilityZone: "az",
-					InstanceId:       "instance.id",
+					InstanceID:       "instance.id",
 					InstanceType:     "instance.type",
-					AmiId:            "ami.id",
+					AmiID:            "ami.id",
 					AmiLaunchIndex:   "ami.launch.index",
 					AmiManifestPath:  "ami.manifest.path",
 				},

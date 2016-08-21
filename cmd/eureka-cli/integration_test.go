@@ -73,7 +73,7 @@ var _ = Describe("CLI", func() {
 		Expect(result.Contains(instances[0])).To(BeTrue())
 
 		// get instance by id
-		session = execBin(append([]string{"instances", "-i", instances[1].Id}, endpointFlags()...)...)
+		session = execBin(append([]string{"instances", "-i", instances[1].ID}, endpointFlags()...)...)
 		Eventually(session).Should(gexec.Exit(0))
 
 		result = new(instancesResult)
@@ -84,7 +84,7 @@ var _ = Describe("CLI", func() {
 		Expect(result.Contains(instances[1])).To(BeTrue())
 
 		// get instance by app name and id
-		session = execBin(append([]string{"instances", "-a", instances[0].AppName, "-i", instances[0].Id}, endpointFlags()...)...)
+		session = execBin(append([]string{"instances", "-a", instances[0].AppName, "-i", instances[0].ID}, endpointFlags()...)...)
 		Eventually(session).Should(gexec.Exit(0))
 
 		result = new(instancesResult)
@@ -103,7 +103,7 @@ var _ = Describe("CLI", func() {
 		Eventually(session).Should(gexec.Exit(0))
 
 		// verify override
-		session = execBin(append([]string{"instances", "-i", instances[0].Id}, endpointFlags()...)...)
+		session = execBin(append([]string{"instances", "-i", instances[0].ID}, endpointFlags()...)...)
 		Eventually(session).Should(gexec.Exit(0))
 
 		result = new(instancesResult)
@@ -119,7 +119,7 @@ var _ = Describe("CLI", func() {
 		Eventually(session).Should(gexec.Exit(0))
 
 		// verify override removal
-		session = execBin(append([]string{"instances", "-i", instances[0].Id}, endpointFlags()...)...)
+		session = execBin(append([]string{"instances", "-i", instances[0].ID}, endpointFlags()...)...)
 		Eventually(session).Should(gexec.Exit(0))
 
 		result = new(instancesResult)

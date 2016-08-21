@@ -7,7 +7,7 @@ import (
 
 type Instance struct {
 	XMLName        xml.Name   `xml:"instance"`
-	Id             string     `xml:"instanceId"`
+	ID             string     `xml:"instanceId"`
 	HostName       string     `xml:"hostName"`
 	AppName        string     `xml:"app"`
 	IpAddr         string     `xml:"ipAddr"`
@@ -56,9 +56,9 @@ type AmazonMetadata struct {
 	PublicIpv4       string `xml:"public-ipv4'`
 	LocalIpv4        string `xml:"local-ipv4"`
 	AvailabilityZone string `xml:"availability-zone"`
-	InstanceId       string `xml:"instance-id"`
+	InstanceID       string `xml:"instance-id"`
 	InstanceType     string `xml:"instance-type"`
-	AmiId            string `xml:"ami-id"`
+	AmiID            string `xml:"ami-id"`
 	AmiLaunchIndex   string `xml:"ami-launch-index"`
 	AmiManifestPath  string `xml:"ami-manifest-path"`
 }

@@ -16,7 +16,7 @@ var instancesCmd = cli.Command{
 	Flags: []cli.Flag{
 		endpointsFlag,
 		appNameFlag,
-		instanceIdFlag,
+		instanceIDFlag,
 	},
 
 	Action: func(c *cli.Context) error {
@@ -26,30 +26,30 @@ var instancesCmd = cli.Command{
 		var instances []*eureka.Instance
 
 		appName := c.String("app")
-		instanceId := c.String("instance")
+		instanceID := c.String("instance")
 
 		switch {
-		case instanceId != "" && appName != "":
-			log.Printf("Retrieving instances for application '%s' and instance id '%s'...", appName, instanceId)
+		case instanceID != "" && appName != "":
+			log.Printf("Retrieving instances for application '%s' and instance id '%s'...", appName, instanceID)
 
-			instance, err := client.AppInstance(appName, instanceId)
+			instance, err := client.AppInstance(appName, instanceID)
 			if err != nil {
 				log.Printf("Error retrieving instance: %s\n", err)
 				return err
 			}
 
 			instances = append(instances, instance)
-		case instanceId != "" && appName == "":
-			log.Printf("Retrieving instance with id '%s'...", instanceId)
+		case instanceID != "" && appName == "":
+			log.Printf("Retrieving instance with id '%s'...", instanceID)
 
-			instance, err := client.Instance(instanceId)
+			instance, err := client.Instance(instanceID)
 			if err != nil {
 				log.Printf("Error retrieving instance: %s\n", err)
 				return err
 			}
 
 			instances = append(instances, instance)
-		case instanceId == "" && appName != "":
+		case instanceID == "" && appName != "":
 			log.Printf("Retrieving instances for application '%s'...", appName)
 
 			app, err := client.App(appName)

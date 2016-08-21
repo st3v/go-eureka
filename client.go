@@ -48,11 +48,11 @@ func (c *Client) Register(instance *Instance) error {
 }
 
 func (c *Client) Deregister(instance *Instance) error {
-	return c.retry(c.do("DELETE", c.appInstancePath(instance.AppName, instance.Id), nil, http.StatusOK))
+	return c.retry(c.do("DELETE", c.appInstancePath(instance.AppName, instance.ID), nil, http.StatusOK))
 }
 
 func (c *Client) Heartbeat(instance *Instance) error {
-	return c.retry(c.do("PUT", c.appInstancePath(instance.AppName, instance.Id), nil, http.StatusOK))
+	return c.retry(c.do("PUT", c.appInstancePath(instance.AppName, instance.ID), nil, http.StatusOK))
 }
 
 func (c *Client) Apps() ([]*App, error) {
@@ -70,24 +70,24 @@ func (c *Client) App(appName string) (*App, error) {
 	return app, err
 }
 
-func (c *Client) AppInstance(appName, instanceId string) (*Instance, error) {
+func (c *Client) AppInstance(appName, instanceID string) (*Instance, error) {
 	instance := new(Instance)
-	err := c.retry(c.get(c.appInstancePath(appName, instanceId), instance))
+	err := c.retry(c.get(c.appInstancePath(appName, instanceID), instance))
 	return instance, err
 }
 
-func (c *Client) Instance(instanceId string) (*Instance, error) {
+func (c *Client) Instance(instanceID string) (*Instance, error) {
 	instance := new(Instance)
-	err := c.retry(c.get(c.instancePath(instanceId), instance))
+	err := c.retry(c.get(c.instancePath(instanceID), instance))
 	return instance, err
 }
 
 func (c *Client) StatusOverride(instance *Instance, status Status) error {
-	return c.retry(c.do("PUT", c.appInstanceStatusPath(instance.AppName, instance.Id, status), nil, http.StatusOK))
+	return c.retry(c.do("PUT", c.appInstanceStatusPath(instance.AppName, instance.ID, status), nil, http.StatusOK))
 }
 
 func (c *Client) RemoveStatusOverride(instance *Instance, fallback Status) error {
-	return c.retry(c.do("DELETE", c.appInstanceStatusPath(instance.AppName, instance.Id, fallback), nil, http.StatusOK))
+	return c.retry(c.do("DELETE", c.appInstanceStatusPath(instance.AppName, instance.ID, fallback), nil, http.StatusOK))
 }
 
 func (c *Client) retry(action retry.Action) error {
@@ -152,14 +152,14 @@ func (c *Client) appPath(appName string) string {
 	return fmt.Sprintf("%s/%s", c.appsPath(), appName)
 }
 
-func (c *Client) appInstancePath(appName, instanceId string) string {
-	return fmt.Sprintf("%s/%s", c.appPath(appName), instanceId)
+func (c *Client) appInstancePath(appName, instanceID string) string {
+	return fmt.Sprintf("%s/%s", c.appPath(appName), instanceID)
 }
 
-func (c *Client) instancePath(instanceId string) string {
-	return fmt.Sprintf("instances/%s", instanceId)
+func (c *Client) instancePath(instanceID string) string {
+	return fmt.Sprintf("instances/%s", instanceID)
 }
 
-func (c *Client) appInstanceStatusPath(appName, instanceId string, status Status) string {
-	return fmt.Sprintf("%s/status?value=%s", c.appInstancePath(appName, instanceId), status)
+func (c *Client) appInstanceStatusPath(appName, instanceID string, status Status) string {
+	return fmt.Sprintf("%s/status?value=%s", c.appInstancePath(appName, instanceID), status)
 }

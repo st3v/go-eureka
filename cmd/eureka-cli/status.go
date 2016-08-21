@@ -45,7 +45,7 @@ var overrideCmd = cli.Command{
 		endpoints := getEndpoints(c, "override-status")
 		status := getStatus(c, true)
 
-		log.Printf("Overriding status for instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
+		log.Printf("Overriding status for instance '%s' of application '%s'... \n", instance.ID, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.StatusOverride(instance, status); err != nil {
 			log.Printf("Error overriding status: %s\n", err)
@@ -71,7 +71,7 @@ var removeOverrideCmd = cli.Command{
 		endpoints := getEndpoints(c, "remove-override")
 		status := getStatus(c, false)
 
-		log.Printf("Remove overridden status from instance '%s' of application '%s'... \n", instance.Id, instance.AppName)
+		log.Printf("Remove overridden status from instance '%s' of application '%s'... \n", instance.ID, instance.AppName)
 		client := eureka.NewClient(endpoints)
 		if err := client.RemoveStatusOverride(instance, status); err != nil {
 			log.Printf("Error overriding status: %s\n", err)

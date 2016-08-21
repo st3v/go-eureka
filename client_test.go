@@ -90,7 +90,7 @@ var _ = Describe("client", func() {
 
 	Describe(".Deregister", func() {
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.ID)
 			statusCode = http.StatusOK
 			for i := 0; i < numRetries; i++ {
 				server.AppendHandlers(
@@ -131,7 +131,7 @@ var _ = Describe("client", func() {
 
 	Describe(".Heartbeat", func() {
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.ID)
 			statusCode = http.StatusOK
 			for i := 0; i < numRetries; i++ {
 				server.AppendHandlers(
@@ -297,7 +297,7 @@ var _ = Describe("client", func() {
 			body, err = xml.Marshal(instance)
 			Expect(err).ToNot(HaveOccurred())
 
-			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s", instance.AppName, instance.ID)
 			statusCode = http.StatusOK
 			for i := 0; i < numRetries; i++ {
 				server.AppendHandlers(
@@ -310,17 +310,17 @@ var _ = Describe("client", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.AppInstance(instance.AppName, instance.Id)
+			client.AppInstance(instance.AppName, instance.ID)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			_, err := client.AppInstance(instance.AppName, instance.Id)
+			_, err := client.AppInstance(instance.AppName, instance.ID)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("returns the correct instance", func() {
-			actual, _ := client.AppInstance(instance.AppName, instance.Id)
+			actual, _ := client.AppInstance(instance.AppName, instance.ID)
 			Expect(actual).To(Equal(instance))
 		})
 
@@ -330,12 +330,12 @@ var _ = Describe("client", func() {
 			})
 
 			It("retries the request", func() {
-				client.AppInstance(instance.AppName, instance.Id)
+				client.AppInstance(instance.AppName, instance.ID)
 				Expect(server.ReceivedRequests()).To(HaveLen(numRetries))
 			})
 
 			It("returns an error", func() {
-				_, err := client.AppInstance(instance.AppName, instance.Id)
+				_, err := client.AppInstance(instance.AppName, instance.ID)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -351,7 +351,7 @@ var _ = Describe("client", func() {
 			body, err = xml.Marshal(instance)
 			Expect(err).ToNot(HaveOccurred())
 
-			route := fmt.Sprintf("/instances/%s", instance.Id)
+			route := fmt.Sprintf("/instances/%s", instance.ID)
 			statusCode = http.StatusOK
 			for i := 0; i < numRetries; i++ {
 				server.AppendHandlers(
@@ -364,17 +364,17 @@ var _ = Describe("client", func() {
 		})
 
 		It("sends the correct request", func() {
-			client.Instance(instance.Id)
+			client.Instance(instance.ID)
 			Expect(server.ReceivedRequests()).To(HaveLen(1))
 		})
 
 		It("returns no error", func() {
-			_, err := client.Instance(instance.Id)
+			_, err := client.Instance(instance.ID)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("returns the correct instance", func() {
-			actual, _ := client.Instance(instance.Id)
+			actual, _ := client.Instance(instance.ID)
 			Expect(actual).To(Equal(instance))
 		})
 
@@ -384,12 +384,12 @@ var _ = Describe("client", func() {
 			})
 
 			It("retries the request", func() {
-				client.Instance(instance.Id)
+				client.Instance(instance.ID)
 				Expect(server.ReceivedRequests()).To(HaveLen(numRetries))
 			})
 
 			It("returns an error", func() {
-				_, err := client.Instance(instance.Id)
+				_, err := client.Instance(instance.ID)
 				Expect(err).To(MatchError("Unexpected response code 500"))
 			})
 		})
@@ -399,7 +399,7 @@ var _ = Describe("client", func() {
 		var status = eureka.StatusDown
 
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s/status", instance.AppName, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s/status", instance.AppName, instance.ID)
 			statusCode = http.StatusOK
 			for i := 0; i < numRetries; i++ {
 				server.AppendHandlers(
@@ -442,7 +442,7 @@ var _ = Describe("client", func() {
 		var fallback = eureka.StatusDown
 
 		BeforeEach(func() {
-			route := fmt.Sprintf("/apps/%s/%s/status", instance.AppName, instance.Id)
+			route := fmt.Sprintf("/apps/%s/%s/status", instance.AppName, instance.ID)
 			statusCode = http.StatusOK
 			for i := 0; i < numRetries; i++ {
 				server.AppendHandlers(
