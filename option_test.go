@@ -1,9 +1,12 @@
 package eureka
 
 import (
+	"crypto/tls"
 	"net/http"
 	"reflect"
 	"time"
+
+	"golang.org/x/oauth2"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -15,7 +18,7 @@ var _ = Describe("client options", func() {
 	Describe("No option", func() {
 		It("uses the default http client", func() {
 			client := NewClient([]string{"endpoint"})
-			Expect(client.httpClient).To(Equal(DefaultHTTPClient))
+			Expect(client.httpClient).To(Equal(newHTTPClient(newDefaultHTTPClientOptions())))
 		})
 
 		It("uses the default retry selector", func() {
@@ -34,11 +37,39 @@ var _ = Describe("client options", func() {
 		})
 	})
 
-	Describe("HTTPClient", func() {
-		It("switches to the specified http client", func() {
-			hc := &http.Client{}
-			client := NewClient([]string{"endpoint"}, HTTPClient(hc))
-			Expect(client.httpClient).To(Equal(hc))
+	Describe("HTTPTimeout", func() {
+		It("sets the timeout for the internal HTTP client", func() {
+			timeout := 123 * time.Second
+			client := NewClient([]string{"endpoint"}, HTTPTimeout(timeout))
+			Expect(client.httpClient.Timeout).To(Equal(timeout))
+		})
+	})
+
+	Describe("HTTPTransport", func() {
+		It("sets the transport for the internal HTTP client", func() {
+			transport := new(http.Transport)
+			client := NewClient([]string{"endpoint"}, HTTPTransport(transport))
+			Expect(client.httpClient.Transport).To(BeIdenticalTo(transport))
+		})
+	})
+
+	Describe("TLSConfig", func() {
+		It("sets the tls config for the internal HTTP client", func() {
+			tlsConfig := &tls.Config{InsecureSkipVerify: true}
+			client := NewClient([]string{"endpoint"}, TLSConfig(tlsConfig))
+			transport, ok := client.httpClient.Transport.(*http.Transport)
+			Expect(ok).To(BeTrue())
+			Expect(transport.TLSClientConfig).To(BeIdenticalTo(tlsConfig))
+		})
+	})
+
+	Describe("Oauth2ClientCredentials", func() {
+		It("wraps the internal http client transport in an oauth2 transport", func() {
+			id, secret, uri, scope := "client-id", "client-secret", "token-uri", "scope"
+			client := NewClient([]string{"endpoint"}, Oauth2ClientCredentials(id, secret, uri, scope))
+			transport, ok := client.httpClient.Transport.(*oauth2.Transport)
+			Expect(ok).To(BeTrue())
+			Expect(transport.Base).To(BeIdenticalTo(DefaultTransport))
 		})
 	})
 

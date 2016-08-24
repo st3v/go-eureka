@@ -12,11 +12,12 @@ import (
 )
 
 type Client struct {
-	endpoints     []string
-	httpClient    *http.Client
-	retrySelector retry.Selector
-	retryLimit    retry.Allow
-	retryDelay    retry.Delay
+	endpoints         []string
+	httpClient        *http.Client
+	httpClientOptions *httpClientOptions
+	retrySelector     retry.Selector
+	retryLimit        retry.Allow
+	retryDelay        retry.Delay
 }
 
 func NewClient(endpoints []string, options ...Option) *Client {
@@ -25,16 +26,18 @@ func NewClient(endpoints []string, options ...Option) *Client {
 	}
 
 	c := &Client{
-		endpoints:     endpoints,
-		httpClient:    DefaultHTTPClient,
-		retrySelector: DefaultRetrySelector,
-		retryLimit:    DefaultRetryLimit,
-		retryDelay:    DefaultRetryDelay,
+		endpoints:         endpoints,
+		httpClientOptions: newDefaultHTTPClientOptions(),
+		retrySelector:     DefaultRetrySelector,
+		retryLimit:        DefaultRetryLimit,
+		retryDelay:        DefaultRetryDelay,
 	}
 
 	for _, opt := range options {
 		opt(c)
 	}
+
+	c.httpClient = newHTTPClient(c.httpClientOptions)
 
 	return c
 }
