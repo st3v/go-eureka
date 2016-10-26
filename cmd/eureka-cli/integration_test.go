@@ -14,6 +14,7 @@ import (
 	"github.com/st3v/go-eureka"
 )
 
+// requires a running Eureka instance, e.g. `docker run -p 8080:8080 netflixoss/eureka:1.3.1`
 var _ = Describe("CLI", func() {
 	var (
 		instances         []*eureka.Instance

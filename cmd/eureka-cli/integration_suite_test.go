@@ -85,8 +85,15 @@ func testInstance() *eureka.Instance {
 }
 
 func endpoints() []string {
+	errMsg := "Environment variable EUREKA_URLS not set or invalid. " +
+		"Must be a comma-separated list of Eureka API URLs. " +
+		"E.g. EUREKA_URLS=http://localhost:8080/eureka/v2"
+
 	endpoints := strings.Split(os.Getenv("EUREKA_URLS"), ",")
+	Expect(endpoints).ToNot(BeEmpty(), errMsg)
+
 	for i, e := range endpoints {
+		Expect(e).ToNot(BeEmpty(), errMsg)
 		if !strings.HasPrefix(e, "http") {
 			endpoints[i] = fmt.Sprintf("http://%s", e)
 		}
