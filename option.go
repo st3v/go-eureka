@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/st3v/go-eureka/retry"
@@ -34,56 +32,24 @@ var (
 
 type Option func(*Client)
 
-type httpClientOptions struct {
-	timeout      time.Duration
-	transport    *http.Transport
-	oauth2Config *clientcredentials.Config
-	tlsConfig    *tls.Config
-}
-
-func newDefaultHTTPClientOptions() *httpClientOptions {
-	return &httpClientOptions{
-		timeout:   DefaultTimeout,
-		transport: DefaultTransport,
-	}
-}
-
-func newHTTPClient(opts *httpClientOptions) *http.Client {
-	if opts.tlsConfig != nil {
-		opts.transport.TLSClientConfig = opts.tlsConfig
-	}
-
-	c := &http.Client{
-		Timeout:   opts.timeout,
-		Transport: opts.transport,
-	}
-
-	if opts.oauth2Config != nil {
-		ctx := context.WithValue(context.Background(), oauth2.HTTPClient, c)
-		c = opts.oauth2Config.Client(ctx)
-	}
-
-	return c
-}
-
 // HTTPTimeout sets the timeout for the internal HTTP client.
 func HTTPTimeout(t time.Duration) Option {
 	return func(c *Client) {
-		c.httpClientOptions.timeout = t
+		c.timeout = t
 	}
 }
 
 // HTTPTransport sets the transport for the internal HTTP client.
 func HTTPTransport(t *http.Transport) Option {
 	return func(c *Client) {
-		c.httpClientOptions.transport = t
+		c.transport = t
 	}
 }
 
 // TLSConfig sets the TLS config for the internal HTTP client.
 func TLSConfig(config *tls.Config) Option {
 	return func(c *Client) {
-		c.httpClientOptions.tlsConfig = config
+		c.tlsConfig = config
 	}
 }
 
@@ -91,7 +57,7 @@ func TLSConfig(config *tls.Config) Option {
 // Oauth2 Client Credential flow to authenticate with the Eureka server.
 func Oauth2ClientCredentials(clientID, clientSecret, tokenURI string, scopes ...string) Option {
 	return func(c *Client) {
-		c.httpClientOptions.oauth2Config = &clientcredentials.Config{
+		c.oauth2Config = &clientcredentials.Config{
 			ClientID:     clientID,
 			ClientSecret: clientSecret,
 			TokenURL:     tokenURI,

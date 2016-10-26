@@ -2,22 +2,30 @@ package eureka
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/xml"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
+
 	"github.com/st3v/go-eureka/retry"
 )
 
 type Client struct {
-	endpoints         []string
-	httpClient        *http.Client
-	httpClientOptions *httpClientOptions
-	retrySelector     retry.Selector
-	retryLimit        retry.Allow
-	retryDelay        retry.Delay
+	endpoints     []string
+	retrySelector retry.Selector
+	retryLimit    retry.Allow
+	retryDelay    retry.Delay
+	httpClient    *http.Client
+	timeout       time.Duration
+	transport     *http.Transport
+	oauth2Config  *clientcredentials.Config
+	tlsConfig     *tls.Config
 }
 
 func NewClient(endpoints []string, options ...Option) *Client {
@@ -26,20 +34,40 @@ func NewClient(endpoints []string, options ...Option) *Client {
 	}
 
 	c := &Client{
-		endpoints:         endpoints,
-		httpClientOptions: newDefaultHTTPClientOptions(),
-		retrySelector:     DefaultRetrySelector,
-		retryLimit:        DefaultRetryLimit,
-		retryDelay:        DefaultRetryDelay,
+		endpoints:     endpoints,
+		timeout:       DefaultTimeout,
+		transport:     DefaultTransport,
+		retrySelector: DefaultRetrySelector,
+		retryLimit:    DefaultRetryLimit,
+		retryDelay:    DefaultRetryDelay,
 	}
 
 	for _, opt := range options {
 		opt(c)
 	}
 
-	c.httpClient = newHTTPClient(c.httpClientOptions)
+	c.httpClient = c.newHTTPClient()
 
 	return c
+}
+
+func (c *Client) newHTTPClient() *http.Client {
+	transport := c.transport
+	if c.tlsConfig != nil {
+		transport.TLSClientConfig = c.tlsConfig
+	}
+
+	httpClient := &http.Client{
+		Timeout:   c.timeout,
+		Transport: transport,
+	}
+
+	if c.oauth2Config != nil {
+		ctx := context.WithValue(context.Background(), oauth2.HTTPClient, httpClient)
+		httpClient = c.oauth2Config.Client(ctx)
+	}
+
+	return httpClient
 }
 
 func (c *Client) Register(instance *Instance) error {

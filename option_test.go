@@ -17,8 +17,13 @@ import (
 var _ = Describe("client options", func() {
 	Describe("No option", func() {
 		It("uses the default http client", func() {
-			client := NewClient([]string{"endpoint"})
-			Expect(client.httpClient).To(Equal(newHTTPClient(newDefaultHTTPClientOptions())))
+			actual := NewClient([]string{"endpoint"}).httpClient
+			expected := &http.Client{
+				Timeout:   DefaultTimeout,
+				Transport: DefaultTransport,
+			}
+
+			Expect(actual).To(Equal(expected))
 		})
 
 		It("uses the default retry selector", func() {
